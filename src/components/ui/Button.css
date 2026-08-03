@@ -1,0 +1,68 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 20px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform var(--transition-tap), background var(--transition-tap), opacity var(--transition-tap);
+  user-select: none;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97); /* feedback ทันทีตอนกด ตามสเปก H5 */
+}
+
+.btn--lg { min-height: var(--button-height-lg); padding: 0 24px; }
+.btn--md { min-height: var(--button-height); padding: 0 20px; font-size: 18px; }
+
+.btn--primary {
+  background: var(--color-primary);
+  color: white;
+}
+.btn--primary:hover:not(:disabled) { background: var(--color-primary-dark); }
+
+.btn--secondary {
+  background: white;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.btn--secondary:hover:not(:disabled) { background: var(--color-primary-light); }
+
+.btn--danger {
+  background: var(--color-danger);
+  color: white;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn__loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn__spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  border-top-color: white;
+  animation: btn-spin 0.7s linear infinite;
+}
+
+.btn--secondary .btn__spinner {
+  border: 3px solid rgba(15, 118, 110, 0.3);
+  border-top-color: var(--color-primary);
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}

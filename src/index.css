@@ -1,0 +1,121 @@
+/* ================================================================
+   Design Tokens — อิงสเปกหมวด H (UX/UI สำหรับผู้สูงอายุ) ในเอกสาร prompt
+   ห้ามแก้ค่าพวกนี้แบบสุ่มในคอมโพเนนต์ย่อย ให้ประกาศ token ใหม่ที่นี่แทน
+   ================================================================ */
+:root {
+  /* --- H1: โทนสี — Teal/Emerald เข้ม เป็นสีหลัก --- */
+  --color-primary: #0F766E;
+  --color-primary-dark: #0B5A54;
+  --color-primary-light: #CCFBF1;
+
+  /* สีสถานะ — สงวนไว้ใช้เฉพาะบอกสถานะเท่านั้น ห้ามใช้ตกแต่งทั่วไป */
+  --color-success: #16A34A;
+  --color-success-bg: #DCFCE7;
+  --color-warning: #CA8A04;
+  --color-warning-bg: #FEF9C3;
+  --color-danger: #DC2626;
+  --color-danger-bg: #FEE2E2;
+  --color-info: #2563EB;
+  --color-info-bg: #DBEAFE;
+
+  /* พื้นหลัง/พื้นผิว — ขาว/เทาอ่อนมาก คอนทราสต์สูงสุด */
+  --color-bg: #FFFFFF;
+  --color-surface: #F8FAFA;
+  --color-border: #E2E8E7;
+  --color-text: #111827;
+  --color-text-muted: #4B5563;
+  --color-disabled: #9CA3AF;
+
+  /* --- H3: ขนาดตัวอักษร/ปุ่ม สำหรับผู้สูงอายุ --- */
+  --font-body: 19px;
+  --font-heading: 26px;
+  --font-input-number: 34px;
+  --button-height: 60px;
+  --button-height-lg: 64px;
+  --tap-gap: 16px;
+
+  --radius: 14px;
+  --radius-sm: 8px;
+
+  /* --- H5: Animation ระดับพอประมาณ --- */
+  --transition-page: 220ms ease;
+  --transition-tap: 100ms ease;
+
+  --shadow-card: 0 1px 3px rgba(15, 23, 22, 0.08), 0 1px 2px rgba(15, 23, 22, 0.06);
+  --shadow-modal: 0 10px 30px rgba(15, 23, 22, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Noto Sans Thai', 'Sarabun', system-ui, -apple-system, sans-serif;
+  font-size: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-surface);
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden; /* ห้ามมี horizontal scroll ตาม H4 */
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* focus visible เพื่อการเข้าถึง (accessibility floor) */
+:focus-visible {
+  outline: 3px solid var(--color-info);
+  outline-offset: 2px;
+}
+
+/* keyframe กลาง ใช้ร่วมกันระหว่าง Button spinner และ LoadingOverlay spinner */
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+h1, h2, h3 {
+  font-size: var(--font-heading);
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 16px 100px 16px; /* เผื่อ bottom nav */
+  min-height: 100%;
+}
+
+@media (min-width: 900px) {
+  .page {
+    max-width: 720px;
+    padding: 32px 32px 48px 32px;
+  }
+}
+
+/* F5: ตอนกด Print ให้เห็นแค่เอกสารในกรอบ .print-area เท่านั้น ซ่อน nav/sidebar/ปุ่มทั้งหมด */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
