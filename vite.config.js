@@ -6,6 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 // - standalone display (ไม่มีแถบ URL)
 // - offline caching เบื้องต้นสำหรับ static asset เท่านั้น (ข้อมูลจริงยังต้องพึ่งเน็ต)
 export default defineConfig({
+  base: '/Stock-App/',
   plugins: [
     react(),
     VitePWA({
@@ -19,8 +20,8 @@ export default defineConfig({
         background_color: '#FFFFFF',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
-        scope: '/',
+        start_url: '/Stock-App/',
+        scope: '/Stock-App/',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
