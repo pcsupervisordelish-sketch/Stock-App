@@ -77,9 +77,27 @@ export default function QRScanner({ onDetected, disabled = false }) {
 
     return () => {
       cancelled = true
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {})
-        scannerRef.current.clear().catch(() => {})
+      const scanner = scannerRef.current
+      if (!scanner) return
+      // ต้องรอ stop() ให้เสร็จสมบูรณ์ก่อนค่อยเรียก clear() เท่านั้น — เรียกพร้อมกัน/ก่อนเวลาทำให้
+      // library แจ้ง "Cannot clear while scan is ongoing" ซึ่งบางเวอร์ชันโยนแบบ synchronous
+      // ไม่ผ่าน Promise เลย จึงต้องครอบ try/catch ทุกจุดไว้กันหลุดไปเป็น uncaught error ที่ทำให้
+      // ทั้งแอปพังกลายเป็นหน้า error (ปัญหานี้เคยเกิดจริงตอนออกจากหน้าสแกนกลางคัน)
+      try {
+        scanner
+          .stop()
+          .then(() => {
+            try {
+              scanner.clear()
+            } catch {
+              /* clear() บาง state โยน error แบบ synchronous — ไม่กระทบอะไรต่อ ปล่อยผ่านได้ */
+            }
+          })
+          .catch(() => {
+            /* stop() ล้มเหลว (เช่นกล้องถูกปิดไปก่อนแล้ว) — ไม่ต้อง clear ต่อ ไม่กระทบการใช้งาน */
+          })
+      } catch {
+        /* เผื่อ stop() เองก็โยน error แบบ synchronous ได้เช่นกันในบาง state ของอุปกรณ์/เบราว์เซอร์ */
       }
     }
   }, [mode, disabled, onDetected])
