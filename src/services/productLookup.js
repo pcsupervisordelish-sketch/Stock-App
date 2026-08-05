@@ -47,6 +47,9 @@ function mapCompanyMasterRow(row) {
   return {
     sku: row['รหัสสินค้า'],
     name: row['ชื่อสินค้า'],
-    unit: row['หน่วยนับ หน้าร้าน'] || row['หน่วยนับหลัก'] || ''
+    // เช็ค "หน่วย" (คอลัมน์เดี่ยวแบบย่อที่ใช้ใน ProductMasterCompany) ก่อน แล้วค่อย fallback
+    // ไปชื่อคอลัมน์เต็มของ StockCountBaseline (หน่วยนับ หน้าร้าน / หน่วยนับหลัก) เผื่อแถวนั้น
+    // มาจาก fallback ของ SAP baseline ที่ยังใช้ชื่อคอลัมน์เดิมอยู่
+    unit: row['หน่วย'] || row['หน่วยนับ หน้าร้าน'] || row['หน่วยนับหลัก'] || ''
   }
 }
