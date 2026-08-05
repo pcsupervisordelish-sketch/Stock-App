@@ -7,6 +7,7 @@ import { useGeolocation } from '../../hooks/useGeolocation'
 import { useDraftAutosave } from '../../hooks/useDraftAutosave'
 import { getCategory, getNoteHistory, saveNoteToHistory } from '../../config/returnCategories'
 import { lookupProduct, confirmDraftBatch } from '../../services/returnsService'
+import { parseScannedCode } from '../../utils/parseScannedCode'
 import { todayKey } from '../../utils/dateUtils'
 import { newTransactionId } from '../../utils/transactionId'
 import QRScanner from '../../components/ui/QRScanner'
@@ -48,21 +49,29 @@ export default function ReturnsScanPage() {
     )
   }
 
-  const handleDetected = async (code) => {
+  const handleDetected = async (raw) => {
     if (looking) return
     setLooking(true)
     setNotFound(false)
     setPendingProduct(null)
     try {
-      const product = await lookupProduct(code, { branchType: session.branchType, branchCode: session.branchCode })
+      // QR สินค้าจริงเข้ารหัสเป็น "รหัสสินค้า|น้ำหนัก" (เช่น FG0001|0.5) ต้องแยกก่อนค้นหาเสมอ
+      // ห้ามเอาสตริงดิบทั้งก้อนไปค้นหาตรงๆ ไม่งั้นจะหาไม่เจอทุกครั้ง
+      const { sku, weight } = parseScannedCode(raw)
+      if (!sku) {
+        show('อ่านรหัสไม่ได้ กรุณาลองสแกนใหม่หรือกรอกรหัสมือ', { type: 'error' })
+        return
+      }
+      const product = await lookupProduct(sku, { branchType: session.branchType, branchCode: session.branchCode })
       if (product) {
         setPendingProduct(product)
-        setQuantity(1)
+        setQuantity(weight ?? 1)
         setNote('')
       } else {
-        setPendingProduct({ sku: code, name: '', unit: '' })
+        setPendingProduct({ sku, name: '', unit: '' })
         setManualName('')
         setNotFound(true)
+        if (weight) setQuantity(weight)
       }
     } catch (err) {
       show(err.message || 'ค้นหาสินค้าไม่สำเร็จ', { type: 'error' })

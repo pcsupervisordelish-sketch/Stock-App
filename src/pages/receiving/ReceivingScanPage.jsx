@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useDraftAutosave } from '../../hooks/useDraftAutosave'
 import { lookupProduct } from '../../services/productLookup'
+import { parseScannedCode } from '../../utils/parseScannedCode'
 import { todayKey } from '../../utils/dateUtils'
 import { newTransactionId } from '../../utils/transactionId'
 import QRScanner from '../../components/ui/QRScanner'
@@ -35,13 +36,19 @@ export default function ReceivingScanPage() {
   const [noteQty, setNoteQty] = useState(0)
   const [looking, setLooking] = useState(false)
 
-  const handleDetected = async (code) => {
+  const handleDetected = async (raw) => {
     if (looking) return
     setLooking(true)
     setNotFound(false)
     try {
+      const { sku, weight } = parseScannedCode(raw)
+      if (!sku) {
+        show('อ่านรหัสไม่ได้ กรุณาลองสแกนใหม่หรือกรอกรหัสมือ', { type: 'error' })
+        return
+      }
+
       // ถ้า SKU นี้มีอยู่แล้วในรอบเดียวกัน (ยังไม่ submit) -> ขึ้นจำนวนเดิมให้แก้ไขต่อได้ทันที
-      const existing = items.find((it) => it.sku === code.trim())
+      const existing = items.find((it) => it.sku === sku)
       if (existing) {
         setPendingItem({ sku: existing.sku, name: existing.name, unit: existing.unit })
         setReceivedQty(existing.receivedQty)
@@ -50,16 +57,16 @@ export default function ReceivingScanPage() {
         return
       }
 
-      const product = await lookupProduct(code, { branchType: session.branchType, branchCode: session.branchCode })
+      const product = await lookupProduct(sku, { branchType: session.branchType, branchCode: session.branchCode })
       if (product) {
         setPendingItem(product)
-        setReceivedQty(0)
+        setReceivedQty(weight ?? 0)
         setNoteQty(0)
       } else {
-        setPendingItem({ sku: code.trim(), name: '', unit: '' })
+        setPendingItem({ sku, name: '', unit: '' })
         setManualName('')
         setNotFound(true)
-        setReceivedQty(0)
+        setReceivedQty(weight ?? 0)
         setNoteQty(0)
       }
     } catch (err) {

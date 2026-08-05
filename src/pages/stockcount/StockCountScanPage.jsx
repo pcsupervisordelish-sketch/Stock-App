@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useDraftAutosave } from '../../hooks/useDraftAutosave'
 import { fetchTodayBaseline, hasTodaySubmittedCount } from '../../services/stockCountService'
+import { parseScannedCode } from '../../utils/parseScannedCode'
 import { todayKey } from '../../utils/dateUtils'
 import { newTransactionId } from '../../utils/transactionId'
 import QRScanner from '../../components/ui/QRScanner'
@@ -74,16 +75,21 @@ export default function StockCountScanPage() {
   const countedSkuSet = useMemo(() => new Set(items.map((i) => i.sku)), [items])
   const progress = baseline?.length ? Math.round((countedSkuSet.size / baseline.length) * 100) : 0
 
-  const handleDetected = (code) => {
+  const handleDetected = (raw) => {
     if (looking) return
-    const base = baselineMap.get(code.trim())
+    const { sku, weight } = parseScannedCode(raw)
+    if (!sku) {
+      show('อ่านรหัสไม่ได้ กรุณาลองสแกนใหม่หรือกรอกรหัสมือ', { type: 'error' })
+      return
+    }
+    const base = baselineMap.get(sku)
     if (base) {
       setPendingItem({ ...base, offBaseline: false })
-      setQuantity(0)
+      setQuantity(weight ?? 0)
     } else {
-      setPendingItem({ sku: code.trim(), name: '', whCode: '', whName: '', sapQtySystem: '', mainUnit: '', convertUnit: '', sapQtyFront: 0, frontUnit: '', offBaseline: true })
+      setPendingItem({ sku, name: '', whCode: '', whName: '', sapQtySystem: '', mainUnit: '', convertUnit: '', sapQtyFront: 0, frontUnit: '', offBaseline: true })
       setManualName('')
-      setQuantity(0)
+      setQuantity(weight ?? 0)
     }
   }
 

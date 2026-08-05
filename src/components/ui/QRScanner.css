@@ -36,6 +36,13 @@
   font-size: 16px;
 }
 
+.qrscanner__hint {
+  margin-top: 10px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
 .qrscanner__manual {
   display: flex;
   flex-direction: column;

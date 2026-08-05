@@ -3,8 +3,10 @@ import { useAuth } from '../../context/AuthContext'
 import { getMenuForBranchType } from '../../config/menuConfig'
 import Sidebar from './Sidebar'
 import BottomNav from './BottomNav'
+import TopBar from './TopBar'
 import InstanceLockBanner from '../InstanceLockBanner'
 import OfflineBanner from '../OfflineBanner'
+import ErrorBoundary from '../ErrorBoundary'
 
 // เส้นทางที่จำกัดเฉพาะประเภทสาขา — กันเข้าผ่าน URL ตรงทั้งที่เมนูซ่อนไว้แล้ว (A = บริษัทเท่านั้น, D/E = ห้างเท่านั้น)
 const BRANCH_ONLY_PREFIXES = [
@@ -36,10 +38,15 @@ export default function AppLayout() {
     <div style={{ display: 'flex' }}>
       <Sidebar items={items} />
       <div style={{ flex: 1, minWidth: 0 }}>
+        <TopBar />
         <OfflineBanner />
         <InstanceLockBanner />
         <div className="page">
-          <Outlet />
+          {/* ErrorBoundary ชั้นในนี้กันไม่ให้ error เฉพาะหน้าใดหน้าหนึ่งพา TopBar/เมนูหายไปด้วย —
+              ถ้าพังแค่หน้านี้ ผู้ใช้ยังกดปุ่มย้อนกลับ/ออกจากระบบใน TopBar เพื่อหนีออกไปได้เสมอ */}
+          <ErrorBoundary key={location.pathname}>
+            <Outlet />
+          </ErrorBoundary>
         </div>
         <BottomNav items={items} />
       </div>

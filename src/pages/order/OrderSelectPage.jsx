@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useDraftAutosave } from '../../hooks/useDraftAutosave'
 import { orderDraftKey, readOrderDraft, fetchProductMaster } from '../../services/orderService'
+import { parseScannedCode } from '../../utils/parseScannedCode'
 import { newTransactionId } from '../../utils/transactionId'
 import QRScanner from '../../components/ui/QRScanner'
 import NumericInput from '../../components/ui/NumericInput'
@@ -67,8 +68,13 @@ export default function OrderSelectPage() {
     return master.filter((p) => p.nameThai?.toLowerCase().includes(q) || p.nameEng?.toLowerCase().includes(q) || p.sku?.includes(search.trim()))
   }, [master, search])
 
-  const handleDetected = (code) => {
-    const product = master?.find((p) => p.sku === code.trim())
+  const handleDetected = (raw) => {
+    const { sku } = parseScannedCode(raw)
+    if (!sku) {
+      show('อ่านรหัสไม่ได้ กรุณาลองสแกนใหม่หรือกรอกรหัสมือ', { type: 'error' })
+      return
+    }
+    const product = master?.find((p) => p.sku === sku)
     if (product) {
       openQtyEntry(product)
     } else {

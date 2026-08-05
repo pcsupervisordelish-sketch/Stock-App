@@ -1,0 +1,66 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: white;
+  border-bottom: 1px solid var(--color-border);
+  padding: 10px 12px;
+  min-height: 52px;
+}
+
+.topbar__left {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.topbar__back {
+  min-height: 40px;
+  padding: 0 14px;
+  border: none;
+  background: none;
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.topbar__back:active { opacity: 0.6; }
+
+.topbar__center {
+  flex: 2;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar__branch {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.topbar__logout {
+  flex: 1;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  background: white;
+  color: var(--color-danger);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.topbar__logout:active { background: var(--color-danger-bg); }
+
+@media (min-width: 900px) {
+  .topbar__branch { display: none; } /* จอใหญ่เห็นชื่อสาขาใน Sidebar อยู่แล้ว ไม่ต้องซ้ำ */
+}

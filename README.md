@@ -97,6 +97,38 @@ apps-script/     โค้ด Google Apps Script (backend) + วิธีติ�
   client จะได้รับ response กลับมา แล้ว client retry ด้วย transactionId ใหม่ อาจเกิดแถวซ้อนได้
   (แก้ไขทีหลังได้ผ่านหน้าที่มีปุ่มแก้ไข/ลบ) ยอมรับความเสี่ยงนี้ไว้ก่อนเพราะเกิดยากและแก้ย้อนหลังได้
 
+## Deploy บน GitHub Pages (แนะนำ — มี workflow อัตโนมัติให้แล้ว)
+
+โปรเจกต์นี้มี GitHub Actions workflow (`.github/workflows/deploy.yml`) ที่ build และ deploy
+ให้อัตโนมัติทุกครั้งที่ push เข้า branch `main` ทำตามขั้นตอนนี้ครั้งเดียว:
+
+1. Push โค้ดทั้งหมดขึ้น GitHub repo (branch `main`)
+2. ตั้งค่า Secret สำหรับ URL ของ Apps Script (**สำคัญมาก ถ้าลืมขั้นนี้ deploy จะได้แอปที่เชื่อม
+   backend ไม่ได้**):
+   - เข้า repo → **Settings → Secrets and variables → Actions → New repository secret**
+   - ชื่อ: `VITE_APPS_SCRIPT_URL`
+   - ค่า: URL ของ Apps Script Web App (จาก `apps-script/README.md` ขั้นที่ 3)
+3. เปิดใช้ GitHub Pages ด้วย GitHub Actions:
+   - เข้า repo → **Settings → Pages**
+   - ที่ "Build and deployment" → Source เลือก **"GitHub Actions"** (ไม่ใช่ "Deploy from a branch")
+4. Push ครั้งถัดไป (หรือกด **Actions → Deploy to GitHub Pages → Run workflow** เพื่อรันทันที
+   โดยไม่ต้อง push ใหม่) — รอสัก 1-2 นาที จะได้ URL แบบ `https://username.github.io/repo-name/`
+
+**ถ้าเคย deploy มาก่อนหน้านี้ด้วยวิธีอื่น (เช่น push โฟลเดอร์ dist/ เข้า branch gh-pages เอง)**
+ให้ลบ deployment เก่าออกก่อนแล้ว deploy ใหม่ด้วยวิธีนี้ เพื่อให้ได้ไฟล์ที่มี `base: './'` และ
+`HashRouter` ที่แก้ปัญหา 404 ไว้แล้วจริงๆ (ไฟล์เก่าที่เคย build ไว้ก่อนหน้านี้ยังมีปัญหาเดิมอยู่)
+
+## สรุปการแก้ปัญหาที่ tester เจอ (รอบล่าสุด)
+
+| ปัญหาที่เจอ | สาเหตุจริง | วิธีแก้ |
+|---|---|---|
+| ไม่มีปุ่ม logout/ย้อนกลับ | ปุ่ม logout อยู่ใน Sidebar ที่ซ่อนบนจอเล็ก (<900px) | เพิ่ม `TopBar.jsx` แสดงทุกขนาดจอ มีปุ่มกลับ+ออกจากระบบ |
+| กล้องมุมกว้างเกินไป (ultra-wide) | มือถือหลายรุ่นเลือกเลนส์ ultra-wide เป็น default | `QRScanner.jsx` สั่ง zoom เข้า ~2x หลังเปิดกล้องสำเร็จ (ถ้าอุปกรณ์รองรับ) |
+| สแกนแล้วหน้าขาว ไม่มีป๊อปอัพ/ช่องกรอก | โค้ดเอาค่าดิบ `"SKU\|น้ำหนัก"` ไปค้นหาทั้งก้อน หาไม่เจอเสมอ | เพิ่ม `parseScannedCode.js` แยก SKU/น้ำหนักถูกต้อง ใช้ครบทุกหน้าสแกน + เพิ่ม `ErrorBoundary` กันหน้าขาวจาก error อื่นๆในอนาคตด้วย |
+| Error 404 บน GitHub Pages | (1) `base` path ไม่ relative ทำให้ asset หา path ผิดใน subpath (2) `BrowserRouter` ทำให้ refresh หน้า sub-route ยิง request จริงไปหา GitHub Pages แล้ว 404 | ตั้ง `base: './'` + เปลี่ยนเป็น `HashRouter` + เพิ่ม GitHub Actions workflow + `404.html` สำรอง |
+
+
+
 ## ขั้นตอนถัดไป
 
 โครงระบบ + ทุกโมดูล (A-F) เสร็จตามสเปกแล้ว ขั้นต่อไปคือทดสอบกับ Google Sheet จริง

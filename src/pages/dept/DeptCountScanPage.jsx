@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useDraftAutosave } from '../../hooks/useDraftAutosave'
 import { lookupProduct } from '../../services/productLookup'
+import { parseScannedCode } from '../../utils/parseScannedCode'
 import { deptCountDraftKey, hasSubmittedToday } from '../../services/deptCountService'
 import { newTransactionId } from '../../utils/transactionId'
 import QRScanner from '../../components/ui/QRScanner'
@@ -81,20 +82,25 @@ export default function DeptCountScanPage() {
     )
   }
 
-  const handleDetected = async (code) => {
+  const handleDetected = async (raw) => {
     if (looking) return
     setLooking(true)
     setNotFound(false)
     try {
-      const product = await lookupProduct(code, { branchType: session.branchType, branchCode: session.branchCode })
+      const { sku, weight } = parseScannedCode(raw)
+      if (!sku) {
+        show('อ่านรหัสไม่ได้ กรุณาลองสแกนใหม่หรือกรอกรหัสมือ', { type: 'error' })
+        return
+      }
+      const product = await lookupProduct(sku, { branchType: session.branchType, branchCode: session.branchCode })
       if (product) {
         setPendingItem(product)
-        setQuantity(0)
+        setQuantity(weight ?? 0)
       } else {
-        setPendingItem({ sku: code.trim(), name: '', unit: '' })
+        setPendingItem({ sku, name: '', unit: '' })
         setManualName('')
         setNotFound(true)
-        setQuantity(0)
+        setQuantity(weight ?? 0)
       }
     } catch (err) {
       show(err.message || 'ค้นหาสินค้าไม่สำเร็จ', { type: 'error' })
