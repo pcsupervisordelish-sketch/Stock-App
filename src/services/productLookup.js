@@ -1,21 +1,20 @@
 import { readSheet } from './sheetsService'
 import { todayKey } from '../utils/dateUtils'
+import { mapMasterRow, mapCompanyMasterRow } from './productMasterCache'
 
 /**
- * ค้นหาสินค้าจาก SKU — ใช้ร่วมกันทุกโมดูลที่ต้องสแกนแล้วขึ้นชื่อสินค้าอัตโนมัติ (B, C, D1)
+ * ค้นหาสินค้าจาก SKU แบบยิง network เดี่ยวๆ (ไม่ใช่ทั้งชุด) — ใช้เป็น "fallback" เท่านั้น
+ * เมื่อหาในแคช (useCachedData + productMasterCache.js) ไม่เจอ เผื่อเป็น SKU ที่เพิ่งเพิ่มใหม่
+ * ใน Sheet หลัง cache ถูกโหลดไปแล้ว — ทางหลักที่ควรใช้ต้องเป็นแคชในเครื่องเสมอเพื่อความเร็ว
+ * ไม่ใช่ฟังก์ชันนี้ตรงๆทุกครั้งที่สแกน (จะช้ามากถ้าเรียกถี่ๆ)
+ *
  * - สาขาห้าง: ดูจาก ProductMasterBooth / ProductMasterFridge (source of truth ตาม E5)
- * - สาขาบริษัท: ดูจาก 2 แหล่ง เรียงลำดับความสำคัญ:
- *     1) ProductMasterCompany — master ถาวร ไม่ขึ้นกับวัน ใช้เป็นหลักสำหรับโมดูล B (รับเข้า)
- *        และ C (ตีคืน) เพื่อให้ขึ้นชื่อสินค้าอัตโนมัติได้ตลอดเวลา ไม่ต้องรอ import SAP ก่อน
- *     2) StockCountBaseline (บรรทัดเดิม) — baseline SAP ของ "วันนี้" เท่านั้น ใช้เป็น fallback
- *        เผื่อสินค้าเพิ่งมีใน SAP วันนี้แต่ยังไม่ได้เพิ่มลง ProductMasterCompany
- *   หมายเหตุสำคัญ: โมดูล A (นับสต๊อกเทียบ SAP) ไม่ใช้ฟังก์ชันนี้เลย — ยังคงดึงจาก
- *   StockCountBaseline ของวันนั้นโดยตรงเหมือนเดิมทุกประการ (ดู stockCountService.js) เพราะ
- *   ต้องกระทบยอดกับ SAP วันต่อวันจริงๆ ไม่ใช่เทียบกับ master ถาวรที่อาจไม่ตรงกับ SAP ปัจจุบัน
- * ไม่พบทั้ง 2 แหล่ง -> คืนค่า null ให้หน้าจอเปิดโหมดกรอกชื่อเอง (ไม่บล็อกการทำงาน)
+ * - สาขาบริษัท: ดูจาก 2 แหล่ง เรียงลำดับความสำคัญ (ProductMasterCompany ก่อน, StockCountBaseline
+ *   ของวันนี้เป็น fallback) — โมดูล A ไม่ใช้ฟังก์ชันนี้เลย ยังคงดึง baseline ตรงเหมือนเดิม
+ * ไม่พบ -> คืนค่า null ให้หน้าจอเปิดโหมดกรอกชื่อเอง (ไม่บล็อกการทำงาน)
  */
 export async function lookupProduct(sku, { branchType, branchCode }) {
-  const code = sku.trim()
+  const code = String(sku || '').trim().toUpperCase() // uppercase กันตัวพิมพ์เล็ก/ใหญ่ปนกัน
   if (!code) return null
 
   if (branchType === 'ห้าง') {
@@ -37,19 +36,4 @@ export async function lookupProduct(sku, { branchType, branchCode }) {
   if (rows[0]) return mapCompanyMasterRow(rows[0])
 
   return null
-}
-
-function mapMasterRow(row) {
-  return { sku: row['รหัส'], name: row['ชื่อไทย'], unit: row['หน่วย'] || '' }
-}
-
-function mapCompanyMasterRow(row) {
-  return {
-    sku: row['รหัสสินค้า'],
-    name: row['ชื่อสินค้า'],
-    // เช็ค "หน่วย" (คอลัมน์เดี่ยวแบบย่อที่ใช้ใน ProductMasterCompany) ก่อน แล้วค่อย fallback
-    // ไปชื่อคอลัมน์เต็มของ StockCountBaseline (หน่วยนับ หน้าร้าน / หน่วยนับหลัก) เผื่อแถวนั้น
-    // มาจาก fallback ของ SAP baseline ที่ยังใช้ชื่อคอลัมน์เดิมอยู่
-    unit: row['หน่วย'] || row['หน่วยนับ หน้าร้าน'] || row['หน่วยนับหลัก'] || ''
-  }
 }

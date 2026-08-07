@@ -1,4 +1,5 @@
 import Button from './Button'
+import { useKeyboardInset } from '../../hooks/useKeyboardInset'
 
 export default function ConfirmDialog({
   open,
@@ -11,9 +12,10 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel
 }) {
+  const keyboardInset = useKeyboardInset()
   if (!open) return null
   return (
-    <div style={overlay} role="dialog" aria-modal="true">
+    <div style={{ ...overlay, paddingBottom: 16 + keyboardInset }} role="dialog" aria-modal="true">
       <div style={box}>
         <h2 style={{ marginBottom: 10 }}>{title}</h2>
         <div style={{ fontSize: 18, color: 'var(--color-text-muted)', marginBottom: 24, lineHeight: 1.6 }}>

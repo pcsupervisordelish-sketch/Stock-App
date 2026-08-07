@@ -85,11 +85,11 @@ export default function StockCountScanPage() {
     const base = baselineMap.get(sku)
     if (base) {
       setPendingItem({ ...base, offBaseline: false })
-      setQuantity(weight ?? 0)
+      setQuantity(0)
     } else {
       setPendingItem({ sku, name: '', whCode: '', whName: '', sapQtySystem: '', mainUnit: '', convertUnit: '', sapQtyFront: 0, frontUnit: '', offBaseline: true })
       setManualName('')
-      setQuantity(weight ?? 0)
+      setQuantity(0)
     }
   }
 

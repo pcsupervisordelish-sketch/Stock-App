@@ -9,7 +9,9 @@ export function parseScannedCode(raw) {
   if (!text) return { sku: '', weight: null }
 
   const parts = text.split('|').map((p) => p.trim())
-  const sku = parts[0]
+  // uppercase ทันที — พนักงานพิมพ์ตัวพิมพ์เล็ก/ใหญ่ปนกันได้ตามสะดวก (เช่น "fg0001" vs "FG0001")
+  // ระบบต้องมองเป็นสินค้าเดียวกันเสมอ ไม่งั้นจะถูกตีเป็นสินค้าใหม่ทุกครั้งที่พิมพ์ไม่ตรงเป๊ะ
+  const sku = parts[0].toUpperCase()
   const weightRaw = parts[1]
   const weight = weightRaw !== undefined && weightRaw !== '' && !Number.isNaN(Number(weightRaw)) ? Number(weightRaw) : null
 

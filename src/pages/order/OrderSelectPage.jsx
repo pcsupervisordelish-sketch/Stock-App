@@ -5,12 +5,14 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useDraftAutosave } from '../../hooks/useDraftAutosave'
 import { orderDraftKey, readOrderDraft, fetchProductMaster } from '../../services/orderService'
+import { useCachedData } from '../../hooks/useCachedData'
 import { parseScannedCode } from '../../utils/parseScannedCode'
 import { newTransactionId } from '../../utils/transactionId'
 import QRScanner from '../../components/ui/QRScanner'
 import NumericInput from '../../components/ui/NumericInput'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
+import RefreshMasterButton from '../../components/ui/RefreshMasterButton'
 import PageHeader from '../../components/layout/PageHeader'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StickyActionBar from '../../components/layout/StickyActionBar'
@@ -38,8 +40,6 @@ export default function OrderSelectPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const [master, setMaster] = useState(null)
-  const [masterError, setMasterError] = useState(null)
   const [method, setMethod] = useState('browse')
   const [search, setSearch] = useState('')
 
@@ -47,9 +47,13 @@ export default function OrderSelectPage() {
   const [quantity, setQuantity] = useState(1)
   const [duplicateOf, setDuplicateOf] = useState(null)
 
-  useEffect(() => {
-    fetchProductMaster(area).then(setMaster).catch((err) => setMasterError(err.message))
-  }, [area])
+  // แคชรายการสินค้าไว้ในเครื่อง โหลดครั้งถัดไปเร็วขึ้นทันที + รีเฟรชสดเบื้องหลังทุกครั้งที่เข้าหน้า
+  const {
+    data: master,
+    error: masterError,
+    refreshing: masterRefreshing,
+    refresh: refreshMaster
+  } = useCachedData(`orderMaster:${area}`, () => fetchProductMaster(area))
 
   const grouped = useMemo(() => {
     if (!master) return []
@@ -113,6 +117,7 @@ export default function OrderSelectPage() {
       <PageHeader
         title={`เลือกสินค้า — ${AREA_LABEL[area] || area}`}
         subtitle={`รับ/ส่ง ${data.deliveryDate || ''} • ตะกร้ามี ${data.items.length} รายการ`}
+        right={<RefreshMasterButton refreshing={masterRefreshing} onRefresh={refreshMaster} />}
       />
 
       {masterError && <Card style={{ marginBottom: 16 }}><p style={{ color: 'var(--color-danger)', margin: 0 }}>โหลดรายการสินค้าไม่สำเร็จ: {masterError}</p></Card>}

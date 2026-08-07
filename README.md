@@ -126,6 +126,16 @@ apps-script/     โค้ด Google Apps Script (backend) + วิธีติ�
 | กล้องมุมกว้างเกินไป (ultra-wide) | มือถือหลายรุ่นเลือกเลนส์ ultra-wide เป็น default | `QRScanner.jsx` สั่ง zoom เข้า ~2x หลังเปิดกล้องสำเร็จ (ถ้าอุปกรณ์รองรับ) |
 | สแกนแล้วหน้าขาว ไม่มีป๊อปอัพ/ช่องกรอก | โค้ดเอาค่าดิบ `"SKU\|น้ำหนัก"` ไปค้นหาทั้งก้อน หาไม่เจอเสมอ | เพิ่ม `parseScannedCode.js` แยก SKU/น้ำหนักถูกต้อง ใช้ครบทุกหน้าสแกน + เพิ่ม `ErrorBoundary` กันหน้าขาวจาก error อื่นๆในอนาคตด้วย |
 | Error 404 บน GitHub Pages | (1) `base` path ไม่ relative ทำให้ asset หา path ผิดใน subpath (2) `BrowserRouter` ทำให้ refresh หน้า sub-route ยิง request จริงไปหา GitHub Pages แล้ว 404 | ตั้ง `base: './'` + เปลี่ยนเป็น `HashRouter` + เพิ่ม GitHub Actions workflow + `404.html` สำรอง |
+| กล้องยังหยุดไม่สนิทตอนออกจากหน้าสแกน (`Cannot clear while scan is ongoing`) | เรียก `stop()` กับ `clear()` พร้อมกันโดยไม่รอ `stop()` เสร็จก่อน + error บางกรณีโยนแบบ synchronous ไม่ผ่าน Promise | แก้ `QRScanner.jsx` ให้ `clear()` รอ `stop()` เสร็จสมบูรณ์ก่อนเสมอ + ครอบ try/catch ทุกจุด |
+
+## สรุปการแก้ปัญหารอบถัดไป (คีย์บอร์ด/ความเร็ว/ตัวพิมพ์เล็ก-ใหญ่)
+
+| ปัญหาที่เจอ | สาเหตุจริง | วิธีแก้ |
+|---|---|---|
+| น้ำหนักที่สแกนได้เติมลงช่องจำนวนอัตโนมัติ ไม่อยากให้เติม | ตั้งใจทำไว้ตอนแรกเพื่อความเร็ว แต่ไม่ตรงความต้องการจริง | เอาออกทุกจุด (A2, B1, C, D1) เริ่มที่ 0 เสมอ ใช้ QtyStepper (+/-) หรือพิมพ์เอง |
+| พิมพ์รหัสสินค้าตัวพิมพ์เล็ก/ใหญ่ปนกัน ระบบมองเป็นสินค้าคนละตัว | เทียบ SKU แบบ case-sensitive ทั้ง client และ Apps Script | uppercase SKU ที่จุดกำเนิดทุกจุด (`parseScannedCode.js`, ทุก service ที่ดึง sku จาก Sheet) + Apps Script เทียบแบบ case-insensitive ทั้ง read/update/delete |
+| สแกน/กรอกรหัสแล้วรอ 5-7 วิ/SKU | ทุกครั้งที่สแกนยิง request ไปหา Apps Script ใหม่ (ความหน่วงสูงในตัว ~1-3+ วิ/ครั้ง) ทั้งที่ข้อมูลไม่เปลี่ยนระหว่าง session | สร้างระบบ cache (`useCachedData.js` + `productMasterCache.js`) ดึงสินค้าทั้งชุดมาเก็บในเครื่องครั้งเดียว โชว์ผลจาก cache ทันที + รีเฟรชสดเบื้องหลังทุกครั้งที่เข้าหน้า + ปุ่มรีเฟรชมือ + fallback ไปเช็ค Sheet สดถ้าหาในแคชไม่เจอ (SKU ใหม่) — ใช้กับ B, C, D1, E |
+| คีย์บอร์ดมือถือบังปุ่ม/เนื้อหาตอนพิมพ์ | ปุ่มลอย (sticky bar) และ dialog ปักตำแหน่งชิด bottom ของ window ไม่ใช่ visible viewport ที่คีย์บอร์ดบังไปแล้ว | สร้าง `useKeyboardInset.js` (ใช้ visualViewport API) ขยับ `StickyActionBar`/`ConfirmDialog` ให้ลอยเหนือคีย์บอร์ดเสมอ + เพิ่ม `interactive-widget=resizes-visual` ใน viewport meta |
 
 
 

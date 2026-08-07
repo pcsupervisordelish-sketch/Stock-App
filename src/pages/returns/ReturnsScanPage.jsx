@@ -7,6 +7,8 @@ import { useGeolocation } from '../../hooks/useGeolocation'
 import { useDraftAutosave } from '../../hooks/useDraftAutosave'
 import { getCategory, getNoteHistory, saveNoteToHistory } from '../../config/returnCategories'
 import { lookupProduct, confirmDraftBatch } from '../../services/returnsService'
+import { fetchProductMasterEntries, toLookupMap } from '../../services/productMasterCache'
+import { useCachedData } from '../../hooks/useCachedData'
 import { parseScannedCode } from '../../utils/parseScannedCode'
 import { todayKey } from '../../utils/dateUtils'
 import { newTransactionId } from '../../utils/transactionId'
@@ -16,6 +18,7 @@ import QtyStepper from '../../components/ui/QtyStepper'
 import DiscardDraftButton from '../../components/ui/DiscardDraftButton'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
+import RefreshMasterButton from '../../components/ui/RefreshMasterButton'
 import PageHeader from '../../components/layout/PageHeader'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 
@@ -30,6 +33,14 @@ export default function ReturnsScanPage() {
   const draftKey = `returns:${session.branchCode}:${todayKey()}`
   const { data: items, save, clearAfterSubmit, hasRestorableDraft, draftPreview, restoreDraft, discardDraft } =
     useDraftAutosave(draftKey, [])
+
+  // แคชรายการสินค้าทั้งชุดไว้ในเครื่อง lookup ทันทีไม่ต้องรอ network ทุกครั้งที่สแกน (แก้ปัญหาช้า)
+  const masterCacheKey = `productMaster:${session.branchType}:${session.branchCode}`
+  const { data: masterEntries, refreshing: masterRefreshing, refresh: refreshMaster } = useCachedData(
+    masterCacheKey,
+    () => fetchProductMasterEntries(session.branchType, session.branchCode)
+  )
+  const masterMap = toLookupMap(masterEntries)
 
   const [pendingProduct, setPendingProduct] = useState(null) // { sku, name, unit } | null
   const [manualName, setManualName] = useState('')
@@ -51,27 +62,39 @@ export default function ReturnsScanPage() {
 
   const handleDetected = async (raw) => {
     if (looking) return
-    setLooking(true)
     setNotFound(false)
     setPendingProduct(null)
+    // QR สินค้าจริงเข้ารหัสเป็น "รหัสสินค้า|น้ำหนัก" (เช่น FG0001|0.5) ต้องแยกก่อนค้นหาเสมอ
+    // ห้ามเอาสตริงดิบทั้งก้อนไปค้นหาตรงๆ ไม่งั้นจะหาไม่เจอทุกครั้ง (sku ถูก uppercase มาแล้ว)
+    // หมายเหตุ: จงใจไม่เอาน้ำหนักมาเติมจำนวนอัตโนมัติ — ให้พนักงานกรอก/กด +/- เองเสมอ
+    const { sku } = parseScannedCode(raw)
+    if (!sku) {
+      show('อ่านรหัสไม่ได้ กรุณาลองสแกนใหม่หรือกรอกรหัสมือ', { type: 'error' })
+      return
+    }
+
+    // เช็คแคชในเครื่องก่อนเสมอ (เร็วระดับ millisecond ไม่ต้องรอ network) — แก้ปัญหาช้า 5-7 วิ/SKU
+    const cached = masterMap.get(sku)
+    if (cached) {
+      setPendingProduct(cached)
+      setQuantity(0)
+      setNote('')
+      return
+    }
+
+    // ไม่เจอในแคช -> อาจเป็น SKU ใหม่ที่เพิ่งเพิ่มหลัง cache โหลดไป เช็คซ้ำกับ Sheet สดอีกที
+    setLooking(true)
     try {
-      // QR สินค้าจริงเข้ารหัสเป็น "รหัสสินค้า|น้ำหนัก" (เช่น FG0001|0.5) ต้องแยกก่อนค้นหาเสมอ
-      // ห้ามเอาสตริงดิบทั้งก้อนไปค้นหาตรงๆ ไม่งั้นจะหาไม่เจอทุกครั้ง
-      const { sku, weight } = parseScannedCode(raw)
-      if (!sku) {
-        show('อ่านรหัสไม่ได้ กรุณาลองสแกนใหม่หรือกรอกรหัสมือ', { type: 'error' })
-        return
-      }
       const product = await lookupProduct(sku, { branchType: session.branchType, branchCode: session.branchCode })
       if (product) {
         setPendingProduct(product)
-        setQuantity(weight ?? 1)
+        setQuantity(0)
         setNote('')
       } else {
         setPendingProduct({ sku, name: '', unit: '' })
         setManualName('')
         setNotFound(true)
-        if (weight) setQuantity(weight)
+        setQuantity(0)
       }
     } catch (err) {
       show(err.message || 'ค้นหาสินค้าไม่สำเร็จ', { type: 'error' })
@@ -167,7 +190,11 @@ export default function ReturnsScanPage() {
 
   return (
     <div>
-      <PageHeader title={`${category.icon} ${category.label}`} subtitle={category.description} />
+      <PageHeader
+        title={`${category.icon} ${category.label}`}
+        subtitle={category.description}
+        right={<RefreshMasterButton refreshing={masterRefreshing} onRefresh={refreshMaster} />}
+      />
 
       <ConfirmDialog
         open={hasRestorableDraft}

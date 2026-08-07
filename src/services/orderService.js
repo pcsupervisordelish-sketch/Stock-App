@@ -26,7 +26,8 @@ export function readOrderDraft(area, branchCode) {
 export async function fetchProductMaster(area) {
   const rows = await readSheet(MASTER_TAB[area])
   return rows.map((r) => ({
-    sku: r['รหัส'],
+    // uppercase เสมอ — สอดคล้องกับ parseScannedCode.js กันตัวพิมพ์เล็ก/ใหญ่ปนกันหา SKU ไม่เจอ
+    sku: String(r['รหัส'] || '').trim().toUpperCase(),
     nameThai: r['ชื่อไทย'],
     nameEng: r['ชื่ออังกฤษ'],
     weight: r['น้ำหนัก'],

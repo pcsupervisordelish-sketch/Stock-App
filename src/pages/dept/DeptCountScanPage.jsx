@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useDraftAutosave } from '../../hooks/useDraftAutosave'
 import { lookupProduct } from '../../services/productLookup'
+import { fetchProductMasterEntries, toLookupMap } from '../../services/productMasterCache'
+import { useCachedData } from '../../hooks/useCachedData'
 import { parseScannedCode } from '../../utils/parseScannedCode'
 import { deptCountDraftKey, hasSubmittedToday } from '../../services/deptCountService'
 import { newTransactionId } from '../../utils/transactionId'
@@ -13,6 +15,7 @@ import QtyStepper from '../../components/ui/QtyStepper'
 import DiscardDraftButton from '../../components/ui/DiscardDraftButton'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
+import RefreshMasterButton from '../../components/ui/RefreshMasterButton'
 import PageHeader from '../../components/layout/PageHeader'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StickyActionBar from '../../components/layout/StickyActionBar'
@@ -66,6 +69,13 @@ export default function DeptCountScanPage() {
   const { data: items, save, hasRestorableDraft, draftPreview, restoreDraft, discardDraft } =
     useDraftAutosave(draftKey, [])
 
+  // แคชรายการสินค้าทั้งชุดไว้ในเครื่อง lookup ทันทีไม่ต้องรอ network ทุกครั้งที่สแกน (แก้ปัญหาช้า)
+  const masterCacheKey = `productMaster:${session.branchType}:${session.branchCode}`
+  const { data: masterEntries, refreshing: masterRefreshing, refresh: refreshMaster } = useCachedData(masterCacheKey, () =>
+    fetchProductMasterEntries(session.branchType, session.branchCode)
+  )
+  const masterMap = toLookupMap(masterEntries)
+
   const [pendingItem, setPendingItem] = useState(null)
   const [manualName, setManualName] = useState('')
   const [notFound, setNotFound] = useState(false)
@@ -84,23 +94,33 @@ export default function DeptCountScanPage() {
 
   const handleDetected = async (raw) => {
     if (looking) return
-    setLooking(true)
     setNotFound(false)
+    const { sku } = parseScannedCode(raw)
+    if (!sku) {
+      show('อ่านรหัสไม่ได้ กรุณาลองสแกนใหม่หรือกรอกรหัสมือ', { type: 'error' })
+      return
+    }
+
+    // เช็คแคชในเครื่องก่อนเสมอ (เร็วระดับ millisecond ไม่ต้องรอ network) — แก้ปัญหาช้า 5-7 วิ/SKU
+    const cached = masterMap.get(sku)
+    if (cached) {
+      setPendingItem(cached)
+      setQuantity(0)
+      return
+    }
+
+    // ไม่เจอในแคช -> อาจเป็น SKU ใหม่ที่เพิ่งเพิ่มหลัง cache โหลดไป เช็คซ้ำกับ Sheet สดอีกที
+    setLooking(true)
     try {
-      const { sku, weight } = parseScannedCode(raw)
-      if (!sku) {
-        show('อ่านรหัสไม่ได้ กรุณาลองสแกนใหม่หรือกรอกรหัสมือ', { type: 'error' })
-        return
-      }
       const product = await lookupProduct(sku, { branchType: session.branchType, branchCode: session.branchCode })
       if (product) {
         setPendingItem(product)
-        setQuantity(weight ?? 0)
+        setQuantity(0)
       } else {
         setPendingItem({ sku, name: '', unit: '' })
         setManualName('')
         setNotFound(true)
-        setQuantity(weight ?? 0)
+        setQuantity(0)
       }
     } catch (err) {
       show(err.message || 'ค้นหาสินค้าไม่สำเร็จ', { type: 'error' })
@@ -158,7 +178,11 @@ export default function DeptCountScanPage() {
 
   return (
     <div>
-      <PageHeader title={TITLE[type] || 'นับสต๊อก'} subtitle={`นับไปแล้ว ${items.length} SKU`} />
+      <PageHeader
+        title={TITLE[type] || 'นับสต๊อก'}
+        subtitle={`นับไปแล้ว ${items.length} SKU`}
+        right={<RefreshMasterButton refreshing={masterRefreshing} onRefresh={refreshMaster} />}
+      />
 
       <ConfirmDialog
         open={hasRestorableDraft}

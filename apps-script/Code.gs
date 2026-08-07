@@ -136,7 +136,9 @@ function readSheetAsObjects(tab, filters, dateRange) {
     return obj
   })
   if (filters && Object.keys(filters).length > 0) {
-    rows = rows.filter((r) => Object.keys(filters).every((k) => String(r[k]) === String(filters[k])))
+    // เทียบแบบไม่สนตัวพิมพ์เล็ก/ใหญ่ (case-insensitive) — กันปัญหาพนักงานพิมพ์รหัสสินค้า
+    // ตัวพิมพ์เล็ก/ใหญ่ปนกัน (เช่น "fg0001" vs "FG0001") แล้วระบบมองเป็นสินค้าคนละตัว
+    rows = rows.filter((r) => Object.keys(filters).every((k) => String(r[k]).toLowerCase() === String(filters[k]).toLowerCase()))
   }
   // dateRange: {column, from, to} — เทียบแบบ string ตรงๆ ใช้ได้เพราะ format วันที่เป็น YYYY-MM-DD เสมอ
   if (dateRange && dateRange.column) {
@@ -244,7 +246,7 @@ function updateRowsWhere(tab, matchFilters, patch, editReason, editedBy) {
 
     let updatedCount = 0
     for (let i = 1; i < values.length; i++) {
-      const isMatch = matchCols.every((m) => String(values[i][m.index]) === String(matchFilters[m.key]))
+      const isMatch = matchCols.every((m) => String(values[i][m.index]).toLowerCase() === String(matchFilters[m.key]).toLowerCase())
       if (!isMatch) continue
 
       const before = {}
@@ -286,7 +288,7 @@ function deleteRowsWhere(tab, matchFilters, editReason, editedBy) {
     // ลบจากแถวล่างขึ้นบน กัน index เลื่อนระหว่างลบหลายแถว
     let deletedCount = 0
     for (let i = values.length - 1; i >= 1; i--) {
-      const isMatch = matchCols.every((m) => String(values[i][m.index]) === String(matchFilters[m.key]))
+      const isMatch = matchCols.every((m) => String(values[i][m.index]).toLowerCase() === String(matchFilters[m.key]).toLowerCase())
       if (!isMatch) continue
       const rowObj = {}
       headers.forEach((h, idx) => { if (h) rowObj[h] = values[i][idx] })

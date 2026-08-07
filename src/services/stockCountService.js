@@ -10,7 +10,9 @@ const COUNT_TAB = 'StockCount'
 export async function fetchTodayBaseline(branchCode) {
   const rows = await readSheet(BASELINE_TAB, { สาขา: branchCode, วันที่นำเข้า: todayKey() })
   return rows.map((r) => ({
-    sku: r['รหัสสินค้า'],
+    // uppercase เสมอ — สอดคล้องกับ parseScannedCode.js ที่ uppercase ฝั่ง input กันตัวพิมพ์
+    // เล็ก/ใหญ่ปนกันแล้วหา SKU ในแคชไม่เจอ (ระบบมองเป็นสินค้าคนละตัว)
+    sku: String(r['รหัสสินค้า'] || '').trim().toUpperCase(),
     name: r['ชื่อสินค้า'],
     whCode: r['รหัสคลัง'],
     whName: r['คลังสินค้า'],
