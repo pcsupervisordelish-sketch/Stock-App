@@ -9,13 +9,20 @@ export function todayKey(date = new Date()) {
 }
 
 export function nowTimeLabel(date = new Date()) {
-  return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+  // บังคับปี ค.ศ. (gregory) เสมอ — locale th-TH บางเบราว์เซอร์ auto ขึ้นปี พ.ศ. (เช่น 2569 แทน
+  // 2026) ทำให้ไม่ตรงกับ todayKey() ที่ใช้ปี ค.ศ. ล้วน เกิดวันที่ไม่สอดคล้องกันในเอกสารเดียวกัน
+  return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', calendar: 'gregory' })
 }
 
 export function nowDateTimeLabel(date = new Date()) {
   return date.toLocaleString('th-TH', {
-    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', calendar: 'gregory'
   })
+}
+
+// วันที่แบบอ่านง่ายไม่มีเวลา (เช่น "7 ส.ค. 2026") ใช้เป็นหัวข้อบอกบริบทหน้าจอ (เช่น หน้ารับเข้า/ตีคืน)
+export function todayDateLabel(date = new Date()) {
+  return date.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric', calendar: 'gregory' })
 }
 
 // ใช้เช็คตอนเปิดแอป: ถ้า login ไว้ตั้งแต่ "เมื่อวาน" (คนละ todayKey) ให้บังคับ login ใหม่

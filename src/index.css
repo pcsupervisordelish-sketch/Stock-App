@@ -17,6 +17,8 @@
   --color-danger-bg: #FEE2E2;
   --color-info: #2563EB;
   --color-info-bg: #DBEAFE;
+  --color-accent: #7C3AED;
+  --color-accent-bg: #EDE9FE;
 
   /* พื้นหลัง/พื้นผิว — ขาว/เทาอ่อนมาก คอนทราสต์สูงสุด */
   --color-bg: #FFFFFF;
@@ -118,4 +120,31 @@ h1, h2, h3 {
     top: 0;
     width: 100%;
   }
+}
+
+/* เปลี่ยนหน้า (navigation) ให้มี fade+slide เบาๆ ทุกครั้ง — ใช้คู่กับ key={pathname} ที่ AppLayout
+   เพื่อบังคับ remount แล้ว trigger animation ใหม่ทุกครั้งที่เปลี่ยนเส้นทาง */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-transition {
+  animation: page-enter var(--transition-page) both;
+}
+
+/* Card ที่กดได้ (มี onClick) ให้มี feedback ตอน hover/active เบาๆ ทั่วทั้งแอป */
+.card-interactive {
+  transition: transform var(--transition-tap), box-shadow var(--transition-tap);
+}
+.card-interactive:hover {
+  box-shadow: 0 4px 12px rgba(15, 23, 22, 0.1);
+}
+.card-interactive:active {
+  transform: scale(0.98);
 }

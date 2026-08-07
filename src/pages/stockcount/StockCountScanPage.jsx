@@ -8,6 +8,7 @@ import { parseScannedCode } from '../../utils/parseScannedCode'
 import { todayKey } from '../../utils/dateUtils'
 import { newTransactionId } from '../../utils/transactionId'
 import QRScanner from '../../components/ui/QRScanner'
+import BottomSheetModal from '../../components/ui/BottomSheetModal'
 import NumericInput from '../../components/ui/NumericInput'
 import QtyStepper from '../../components/ui/QtyStepper'
 import DiscardDraftButton from '../../components/ui/DiscardDraftButton'
@@ -212,51 +213,51 @@ export default function StockCountScanPage() {
         }}
       />
 
-      {!pendingItem && (
-        <Card style={{ marginBottom: 20 }}>
-          <QRScanner onDetected={handleDetected} disabled={looking || !baseline} />
-        </Card>
-      )}
+      <Card style={{ marginBottom: 20 }}>
+        <QRScanner onDetected={handleDetected} disabled={looking || !baseline} paused={!!pendingItem} />
+      </Card>
 
-      {pendingItem && (
-        <Card style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {pendingItem.offBaseline && (
-            <div style={{ background: 'var(--color-warning-bg)', color: '#7A5B00', padding: 12, borderRadius: 'var(--radius-sm)', fontSize: 15 }}>
-              ⚠️ ไม่พบรหัส "{pendingItem.sku}" ในไฟล์ SAP วันนี้ — ยังบันทึกได้ แต่จะถูกแจ้งแยกในรายงาน
-            </div>
-          )}
-          <div>
-            <div style={{ fontSize: 15, color: 'var(--color-text-muted)' }}>รหัสสินค้า</div>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{pendingItem.sku}</div>
-          </div>
-          {pendingItem.offBaseline ? (
-            <div>
-              <label style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}>ชื่อสินค้า</label>
-              <input
-                style={inputStyle}
-                value={manualName}
-                onChange={(e) => setManualName(e.target.value)}
-                autoFocus
-              />
-            </div>
-          ) : (
-            <div>
-              <div style={{ fontSize: 15, color: 'var(--color-text-muted)' }}>ชื่อสินค้า</div>
-              <div style={{ fontSize: 20, fontWeight: 700 }}>{pendingItem.name}</div>
-              <div style={{ fontSize: 14, color: 'var(--color-text-muted)', marginTop: 4 }}>
-                SAP หน้าร้าน: {pendingItem.sapQtyFront} {pendingItem.frontUnit}
+      <BottomSheetModal open={!!pendingItem} onClose={resetEntry}>
+        {pendingItem && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {pendingItem.offBaseline && (
+              <div style={{ background: 'var(--color-warning-bg)', color: '#7A5B00', padding: 12, borderRadius: 'var(--radius-sm)', fontSize: 15 }}>
+                ⚠️ ไม่พบรหัส "{pendingItem.sku}" ในไฟล์ SAP วันนี้ — ยังบันทึกได้ แต่จะถูกแจ้งแยกในรายงาน
               </div>
+            )}
+            <div>
+              <div style={{ fontSize: 15, color: 'var(--color-text-muted)' }}>รหัสสินค้า</div>
+              <div style={{ fontSize: 20, fontWeight: 700 }}>{pendingItem.sku}</div>
             </div>
-          )}
+            {pendingItem.offBaseline ? (
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}>ชื่อสินค้า</label>
+                <input
+                  style={inputStyle}
+                  value={manualName}
+                  onChange={(e) => setManualName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <div>
+                <div style={{ fontSize: 15, color: 'var(--color-text-muted)' }}>ชื่อสินค้า</div>
+                <div style={{ fontSize: 20, fontWeight: 700 }}>{pendingItem.name}</div>
+                <div style={{ fontSize: 14, color: 'var(--color-text-muted)', marginTop: 4 }}>
+                  SAP หน้าร้าน: {pendingItem.sapQtyFront} {pendingItem.frontUnit}
+                </div>
+              </div>
+            )}
 
-          <NumericInput label="จำนวนที่นับได้จริง" value={quantity} onChange={setQuantity} unit={pendingItem.frontUnit} />
+            <NumericInput label="จำนวนที่นับได้จริง" value={quantity} onChange={setQuantity} unit={pendingItem.frontUnit} />
 
-          <div style={{ display: 'flex', gap: 12 }}>
-            <Button variant="secondary" onClick={resetEntry}>ยกเลิก</Button>
-            <Button onClick={handleConfirmAdd}>บันทึก</Button>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <Button variant="secondary" onClick={resetEntry}>ยกเลิก</Button>
+              <Button onClick={handleConfirmAdd}>บันทึก</Button>
+            </div>
           </div>
-        </Card>
-      )}
+        )}
+      </BottomSheetModal>
 
       {items.length > 0 && (
         <>

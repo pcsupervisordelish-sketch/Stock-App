@@ -9,6 +9,7 @@ import { useCachedData } from '../../hooks/useCachedData'
 import { parseScannedCode } from '../../utils/parseScannedCode'
 import { newTransactionId } from '../../utils/transactionId'
 import QRScanner from '../../components/ui/QRScanner'
+import BottomSheetModal from '../../components/ui/BottomSheetModal'
 import NumericInput from '../../components/ui/NumericInput'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
@@ -140,72 +141,72 @@ export default function OrderSelectPage() {
         }}
       />
 
-      {pendingItem ? (
-        <Card style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <div style={{ fontSize: 15, color: 'var(--color-text-muted)' }}>{pendingItem.sku}</div>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{pendingItem.nameThai}</div>
-            {pendingItem.nameEng && <div style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>{pendingItem.nameEng}</div>}
+      <BottomSheetModal open={!!pendingItem} onClose={() => setPendingItem(null)}>
+        {pendingItem && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 15, color: 'var(--color-text-muted)' }}>{pendingItem.sku}</div>
+              <div style={{ fontSize: 20, fontWeight: 700 }}>{pendingItem.nameThai}</div>
+              {pendingItem.nameEng && <div style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>{pendingItem.nameEng}</div>}
+            </div>
+            <NumericInput label="จำนวนที่จะสั่ง" value={quantity} onChange={setQuantity} unit={pendingItem.unit} />
+            <div style={{ display: 'flex', gap: 12 }}>
+              <Button variant="secondary" onClick={() => setPendingItem(null)}>ยกเลิก</Button>
+              <Button onClick={() => addToCart(false)}>เพิ่มลงตะกร้า</Button>
+            </div>
           </div>
-          <NumericInput label="จำนวนที่จะสั่ง" value={quantity} onChange={setQuantity} unit={pendingItem.unit} />
-          <div style={{ display: 'flex', gap: 12 }}>
-            <Button variant="secondary" onClick={() => setPendingItem(null)}>ยกเลิก</Button>
-            <Button onClick={() => addToCart(false)}>เพิ่มลงตะกร้า</Button>
-          </div>
+        )}
+      </BottomSheetModal>
+
+      <div className="qrscanner__tabs">
+        <button type="button" className={`qrscanner__tab ${method === 'browse' ? 'is-active' : ''}`} onClick={() => setMethod('browse')}>
+          📋 เลือกจากลิสต์
+        </button>
+        <button type="button" className={`qrscanner__tab ${method === 'search' ? 'is-active' : ''}`} onClick={() => setMethod('search')}>
+          🔍 ค้นหา
+        </button>
+        <button type="button" className={`qrscanner__tab ${method === 'scan' ? 'is-active' : ''}`} onClick={() => setMethod('scan')}>
+          📷 สแกน
+        </button>
+      </div>
+
+      {method === 'scan' && (
+        <Card style={{ marginBottom: 100 }}>
+          <QRScanner onDetected={handleDetected} disabled={!master} paused={!!pendingItem} />
         </Card>
-      ) : (
-        <>
-          <div className="qrscanner__tabs">
-            <button type="button" className={`qrscanner__tab ${method === 'browse' ? 'is-active' : ''}`} onClick={() => setMethod('browse')}>
-              📋 เลือกจากลิสต์
-            </button>
-            <button type="button" className={`qrscanner__tab ${method === 'search' ? 'is-active' : ''}`} onClick={() => setMethod('search')}>
-              🔍 ค้นหา
-            </button>
-            <button type="button" className={`qrscanner__tab ${method === 'scan' ? 'is-active' : ''}`} onClick={() => setMethod('scan')}>
-              📷 สแกน
-            </button>
+      )}
+
+      {method === 'search' && (
+        <div style={{ marginBottom: 100 }}>
+          <input
+            placeholder="พิมพ์ชื่อสินค้า (ไทย/อังกฤษ) หรือรหัส"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: '100%', minHeight: 52, fontSize: 18, padding: '0 14px', borderRadius: 'var(--radius)', border: '2px solid var(--color-border)', marginBottom: 14 }}
+            autoFocus
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {searchResults.map((p) => (
+              <ProductRow key={p.sku} product={p} onClick={() => openQtyEntry(p)} inCartQty={data.items.find((it) => it.sku === p.sku)?.quantity} />
+            ))}
           </div>
+        </div>
+      )}
 
-          {method === 'scan' && (
-            <Card style={{ marginBottom: 100 }}>
-              <QRScanner onDetected={handleDetected} disabled={!master} />
-            </Card>
-          )}
-
-          {method === 'search' && (
-            <div style={{ marginBottom: 100 }}>
-              <input
-                placeholder="พิมพ์ชื่อสินค้า (ไทย/อังกฤษ) หรือรหัส"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                style={{ width: '100%', minHeight: 52, fontSize: 18, padding: '0 14px', borderRadius: 'var(--radius)', border: '2px solid var(--color-border)', marginBottom: 14 }}
-                autoFocus
-              />
+      {method === 'browse' && (
+        <div style={{ marginBottom: 100 }}>
+          {!master && !masterError && <p>กำลังโหลดรายการสินค้า...</p>}
+          {grouped.map(([groupName, products]) => (
+            <details key={groupName} open style={{ marginBottom: 12 }}>
+              <summary style={{ fontSize: 16, fontWeight: 700, cursor: 'pointer', padding: '8px 0' }}>{groupName} ({products.length})</summary>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {searchResults.map((p) => (
+                {products.map((p) => (
                   <ProductRow key={p.sku} product={p} onClick={() => openQtyEntry(p)} inCartQty={data.items.find((it) => it.sku === p.sku)?.quantity} />
                 ))}
               </div>
-            </div>
-          )}
-
-          {method === 'browse' && (
-            <div style={{ marginBottom: 100 }}>
-              {!master && !masterError && <p>กำลังโหลดรายการสินค้า...</p>}
-              {grouped.map(([groupName, products]) => (
-                <details key={groupName} open style={{ marginBottom: 12 }}>
-                  <summary style={{ fontSize: 16, fontWeight: 700, cursor: 'pointer', padding: '8px 0' }}>{groupName} ({products.length})</summary>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {products.map((p) => (
-                      <ProductRow key={p.sku} product={p} onClick={() => openQtyEntry(p)} inCartQty={data.items.find((it) => it.sku === p.sku)?.quantity} />
-                    ))}
-                  </div>
-                </details>
-              ))}
-            </div>
-          )}
-        </>
+            </details>
+          ))}
+        </div>
       )}
 
       <StickyActionBar>

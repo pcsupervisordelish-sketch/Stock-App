@@ -45,7 +45,9 @@ export default function AppLayout() {
           {/* ErrorBoundary ชั้นในนี้กันไม่ให้ error เฉพาะหน้าใดหน้าหนึ่งพา TopBar/เมนูหายไปด้วย —
               ถ้าพังแค่หน้านี้ ผู้ใช้ยังกดปุ่มย้อนกลับ/ออกจากระบบใน TopBar เพื่อหนีออกไปได้เสมอ */}
           <ErrorBoundary key={location.pathname}>
-            <Outlet />
+            <div className="page-transition">
+              <Outlet />
+            </div>
           </ErrorBoundary>
         </div>
         <BottomNav items={items} />

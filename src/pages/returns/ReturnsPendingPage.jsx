@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
-import { fetchPendingSlips, shipSlipDate } from '../../services/returnsService'
+import { fetchPendingSlips, shipSlipDate, cancelSlipDate } from '../../services/returnsService'
+import { verifyBranchLogin } from '../../services/sheetsService'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
@@ -25,6 +26,12 @@ export default function ReturnsPendingPage() {
   const [shipping, setShipping] = useState(false)
   const [error, setError] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
+
+  // ยกเลิกทั้งใบ — ต้องยืนยันรหัสผ่านสาขาก่อนเสมอ (ข้อมูลนี้ยืนยันส่งแล้ว ลบออกจาก Sheet ถาวร)
+  const [cancelTarget, setCancelTarget] = useState(null) // date ที่กำลังจะยกเลิก
+  const [cancelPassword, setCancelPassword] = useState('')
+  const [cancelPasswordError, setCancelPasswordError] = useState('')
+  const [cancelling, setCancelling] = useState(false)
 
   const load = () => {
     setError(null)
@@ -64,6 +71,37 @@ export default function ReturnsPendingPage() {
     }
   }
 
+  const openCancelDialog = (date) => {
+    setCancelTarget(date)
+    setCancelPassword('')
+    setCancelPasswordError('')
+  }
+
+  const handleCancelSlip = async () => {
+    if (!cancelPassword.trim()) {
+      setCancelPasswordError('กรุณากรอกรหัสผ่านสาขา')
+      return
+    }
+    setCancelling(true)
+    setCancelPasswordError('')
+    try {
+      // ยืนยันรหัสผ่านสาขาก่อนทุกครั้ง — ใช้ตัวเดียวกับตอน Login ไม่ต้องสร้างระบบ PIN ใหม่
+      const result = await verifyBranchLogin(session.branchCode, cancelPassword)
+      if (!result.valid) {
+        setCancelPasswordError('รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่')
+        return
+      }
+      await cancelSlipDate(session.branchCode, cancelTarget, { editedBy: session.employeeName })
+      show(`ยกเลิกใบวันที่ ${cancelTarget} แล้ว`, { type: 'success' })
+      setCancelTarget(null)
+      load()
+    } catch (err) {
+      show(err.message || 'ยกเลิกไม่สำเร็จ กรุณาลองใหม่', { type: 'error' })
+    } finally {
+      setCancelling(false)
+    }
+  }
+
   return (
     <div>
       <PageHeader title="รายการที่ยังไม่ปิดรอบ" subtitle="ติ๊กเลือกวันที่ขนส่งรับของแล้ว (เลือกได้หลายวัน)" />
@@ -97,6 +135,13 @@ export default function ReturnsPendingPage() {
                 <div style={{ color: 'var(--color-text-muted)', fontSize: 15, margin: '4px 0' }}>{summaryText}</div>
                 <StatusBadge label={`ค้างมา ${slip.pending} วัน`} tone={tone} icon={icon} />
               </div>
+              <button
+                type="button"
+                onClick={() => openCancelDialog(slip.date)}
+                style={{ border: 'none', background: 'none', color: 'var(--color-danger)', fontSize: 13, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                ยกเลิกใบนี้
+              </button>
             </Card>
           )
         })}
@@ -117,6 +162,40 @@ export default function ReturnsPendingPage() {
         onCancel={() => setConfirmOpen(false)}
         loading={shipping}
       />
+
+      <ConfirmDialog
+        open={cancelTarget !== null}
+        title="ยกเลิกใบตีคืนทั้งใบ"
+        danger
+        message={
+          <div>
+            <p style={{ margin: '0 0 12px 0' }}>
+              ยืนยันยกเลิกใบวันที่ <strong>{cancelTarget}</strong> ทั้งใบ — รายการทั้งหมดในวันนี้จะถูกลบออกจากระบบถาวร
+              กู้คืนไม่ได้ กรุณากรอกรหัสผ่านสาขาเพื่อยืนยันตัวตนก่อนดำเนินการ
+            </p>
+            <label style={{ fontWeight: 700, display: 'block', marginBottom: 6 }}>รหัสผ่านสาขา</label>
+            <input
+              type="password"
+              value={cancelPassword}
+              onChange={(e) => {
+                setCancelPassword(e.target.value)
+                setCancelPasswordError('')
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && handleCancelSlip()}
+              autoFocus
+              style={{ width: '100%', fontSize: 18, padding: '10px 14px', borderRadius: 8, border: '2px solid var(--color-border)' }}
+            />
+            {cancelPasswordError && (
+              <p style={{ color: 'var(--color-danger)', fontSize: 14, marginTop: 8, marginBottom: 0 }}>{cancelPasswordError}</p>
+            )}
+          </div>
+        }
+        confirmLabel="ยืนยันยกเลิกใบนี้"
+        onConfirm={handleCancelSlip}
+        onCancel={() => setCancelTarget(null)}
+        loading={cancelling}
+      />
+
       <LoadingOverlay show={shipping} label="กำลังบันทึก..." />
     </div>
   )

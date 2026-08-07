@@ -81,6 +81,17 @@ export async function shipSlipDate(branchCode, date, { editedBy } = {}) {
   )
 }
 
+// C3: ยกเลิกใบทั้งใบ (ลบทุกแถวของวันนั้นทิ้ง) — ใช้เมื่อบันทึกผิดทั้งใบ ต้องยืนยันรหัสผ่านสาขา
+// ที่ฝั่ง UI ก่อนเรียกฟังก์ชันนี้เสมอ (ดู ReturnsPendingPage.jsx) เพราะเป็นการลบข้อมูลที่ยืนยัน
+// ส่งแล้วออกจาก Sheet ถาวร กู้คืนไม่ได้ (ต่างจาก draft ที่ยังไม่ submit ซึ่งยกเลิกได้อิสระอยู่แล้ว)
+export async function cancelSlipDate(branchCode, date, { editedBy } = {}) {
+  return deleteRows(
+    TAB,
+    { สาขา: branchCode, วันที่บันทึก: date },
+    { editedBy, editReason: 'ยกเลิกใบทั้งใบ (C3) — ยืนยันด้วยรหัสผ่านสาขาแล้ว' }
+  )
+}
+
 // C5: ประวัติใบที่ Shipped แล้ว
 export async function fetchShippedHistory(branchCode) {
   const rows = await readSheet(TAB, { สาขา: branchCode, สถานะ: 'Shipped' })
