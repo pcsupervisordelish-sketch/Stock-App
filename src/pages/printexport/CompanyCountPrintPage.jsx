@@ -91,7 +91,7 @@ export default function CompanyCountPrintPage() {
                 <td style={td}>{r['จำนวนหน้าร้าน SAP']}</td>
                 <td style={td}>{r['หน่วยนับ หน้าร้าน']}</td>
                 <td style={td}>{r['นับจริง (รับข้อมูลจากการนับ)']}</td>
-                <td style={{ ...td, fontWeight: 700, color: Number(r['ผลต่าง Diff']) === 0 ? 'inherit' : '#B91C1C' }}>
+                <td style={{ ...td, fontWeight: 700, color: Number(r['ผลต่าง Diff']) === 0 ? 'inherit' : '#C0392B' }}>
                   {r['ผลต่าง Diff']}
                 </td>
               </tr>

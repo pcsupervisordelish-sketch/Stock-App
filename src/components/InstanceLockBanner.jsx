@@ -10,7 +10,7 @@ export default function InstanceLockBanner() {
       role="alert"
       style={{
         background: 'var(--color-warning-bg)',
-        color: '#7A5B00',
+        color: '#5A3C00',
         padding: '12px 16px',
         fontSize: 15,
         fontWeight: 700,

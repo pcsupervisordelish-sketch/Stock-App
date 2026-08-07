@@ -80,7 +80,7 @@ export default function ReceivingPrintPage() {
                 <td style={td}>{r['ชื่อสินค้า']}</td>
                 <td style={td}>{r['จำนวนตามใบส่งของ']}</td>
                 <td style={td}>{r['จำนวนจริงที่รับ']}</td>
-                <td style={{ ...td, color: Number(r['ผลต่าง (ขาด-เกิน)']) === 0 ? 'inherit' : '#B91C1C', fontWeight: 700 }}>
+                <td style={{ ...td, color: Number(r['ผลต่าง (ขาด-เกิน)']) === 0 ? 'inherit' : '#C0392B', fontWeight: 700 }}>
                   {r['ผลต่าง (ขาด-เกิน)']}
                 </td>
                 <td style={td}>{r['หน่วย']}</td>

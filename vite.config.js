@@ -21,7 +21,7 @@ export default defineConfig({
         name: 'ระบบจัดการสต๊อกหน้าร้าน',
         short_name: 'สต๊อกหน้าร้าน',
         description: 'ระบบนับสต๊อก รับเข้า ตีคืน และกระทบยอดขายหน้าร้าน',
-        theme_color: '#0F766E',
+        theme_color: '#1A7A3C',
         background_color: '#FFFFFF',
         display: 'standalone',
         orientation: 'portrait',

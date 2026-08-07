@@ -20,10 +20,10 @@
 .btn--md { min-height: var(--button-height); padding: 0 20px; font-size: 18px; }
 
 .btn--primary {
-  background: var(--color-primary);
+  background: var(--color-primary-btn);
   color: white;
 }
-.btn--primary:hover:not(:disabled) { background: var(--color-primary-dark); }
+.btn--primary:hover:not(:disabled) { background: var(--color-primary); }
 
 .btn--secondary {
   background: white;
@@ -59,7 +59,7 @@
 }
 
 .btn--secondary .btn__spinner {
-  border: 3px solid rgba(15, 118, 110, 0.3);
+  border: 3px solid rgba(26, 122, 60, 0.3);
   border-top-color: var(--color-primary);
 }
 

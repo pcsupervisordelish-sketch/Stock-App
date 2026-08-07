@@ -221,7 +221,7 @@ export default function StockCountScanPage() {
         {pendingItem && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {pendingItem.offBaseline && (
-              <div style={{ background: 'var(--color-warning-bg)', color: '#7A5B00', padding: 12, borderRadius: 'var(--radius-sm)', fontSize: 15 }}>
+              <div style={{ background: 'var(--color-warning-bg)', color: '#5A3C00', padding: 12, borderRadius: 'var(--radius-sm)', fontSize: 15 }}>
                 ⚠️ ไม่พบรหัส "{pendingItem.sku}" ในไฟล์ SAP วันนี้ — ยังบันทึกได้ แต่จะถูกแจ้งแยกในรายงาน
               </div>
             )}

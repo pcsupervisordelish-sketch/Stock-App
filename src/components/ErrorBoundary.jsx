@@ -65,7 +65,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    background: '#F8FAFA',
+    background: '#F0F4F0',
     fontFamily: "'Noto Sans Thai', 'Sarabun', system-ui, -apple-system, sans-serif"
   },
   card: {
@@ -77,19 +77,19 @@ const styles = {
     textAlign: 'center',
     boxShadow: '0 1px 3px rgba(15,23,22,0.08), 0 1px 2px rgba(15,23,22,0.06)'
   },
-  title: { fontSize: 22, fontWeight: 800, margin: '0 0 12px 0', color: '#111827' },
-  text: { fontSize: 16, color: '#4B5563', lineHeight: 1.6, marginBottom: 24 },
+  title: { fontSize: 22, fontWeight: 800, margin: '0 0 12px 0', color: '#1A2A1A' },
+  text: { fontSize: 16, color: '#6A8A6A', lineHeight: 1.6, marginBottom: 24 },
   button: {
     minHeight: 56,
     width: '100%',
     fontSize: 18,
     fontWeight: 700,
     color: 'white',
-    background: '#0F766E',
+    background: '#1A7A3C',
     border: 'none',
     borderRadius: 14,
     cursor: 'pointer'
   },
-  details: { marginTop: 20, textAlign: 'left', fontSize: 13, color: '#9CA3AF' },
-  pre: { whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: '#F8FAFA', padding: 10, borderRadius: 8 }
+  details: { marginTop: 20, textAlign: 'left', fontSize: 13, color: '#9AAA9A' },
+  pre: { whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: '#F0F4F0', padding: 10, borderRadius: 8 }
 }

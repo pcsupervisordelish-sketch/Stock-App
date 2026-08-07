@@ -35,7 +35,7 @@ export default function OrderHomePage() {
 
       {busyArea && (
         <Card style={{ marginBottom: 20, background: 'var(--color-warning-bg)' }}>
-          <p style={{ margin: 0, color: '#7A5B00' }}>
+          <p style={{ margin: 0, color: '#5A3C00' }}>
             มีตะกร้าค้างของพื้นที่ "{AREAS.find((a) => a.key === busyArea).label}" ที่ยังไม่ยืนยันส่งข้อมูล
             ต้องทำรายการนี้ให้เสร็จ (ยืนยันส่งข้อมูล หรือยกเลิกตะกร้าทิ้ง) ก่อนเริ่มพื้นที่อื่นได้
           </p>

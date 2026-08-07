@@ -52,7 +52,7 @@ export default function PrintExportActions({ printAreaRef, printVersion, filenam
   return (
     <div>
       {staleSincePrint && log && (
-        <div style={{ background: 'var(--color-warning-bg)', color: '#7A5B00', padding: 12, borderRadius: 'var(--radius-sm)', marginBottom: 14, fontSize: 14 }}>
+        <div style={{ background: 'var(--color-warning-bg)', color: '#5A3C00', padding: 12, borderRadius: 'var(--radius-sm)', marginBottom: 14, fontSize: 14 }}>
           ⚠️ เอกสารนี้เคยปริ้น/แชร์ไปแล้วเมื่อ {new Date(log.lastPrintedAt).toLocaleString('th-TH', { calendar: 'gregory' })} และข้อมูลมีการเปลี่ยนแปลงหลังจากนั้น
           กรุณาปริ้น/แชร์ใหม่เพื่อให้ตรงกับข้อมูลล่าสุด
         </div>

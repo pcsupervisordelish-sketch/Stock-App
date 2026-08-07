@@ -3,30 +3,32 @@
    ห้ามแก้ค่าพวกนี้แบบสุ่มในคอมโพเนนต์ย่อย ให้ประกาศ token ใหม่ที่นี่แทน
    ================================================================ */
 :root {
-  /* --- H1: โทนสี — Teal/Emerald เข้ม เป็นสีหลัก --- */
-  --color-primary: #0F766E;
-  --color-primary-dark: #0B5A54;
-  --color-primary-light: #CCFBF1;
+  /* --- H1: โทนสี — อิงชุดสี Delish POS V4 (เขียวเป็นสีหลัก) --- */
+  --color-primary: #1A7A3C;
+  --color-primary-dark: #145F2F;
+  --color-primary-light: #E8F5EE;
+  --color-primary-btn: #22A050; /* เขียวปุ่มกด (สดกว่า primary เล็กน้อย ใช้กับปุ่ม action หลัก) */
+  --color-primary-mid: #B8DFC8; /* เขียวกลาง ใช้ทำ border/แถบเน้นเบาๆ */
 
   /* สีสถานะ — สงวนไว้ใช้เฉพาะบอกสถานะเท่านั้น ห้ามใช้ตกแต่งทั่วไป */
-  --color-success: #16A34A;
-  --color-success-bg: #DCFCE7;
-  --color-warning: #CA8A04;
-  --color-warning-bg: #FEF9C3;
-  --color-danger: #DC2626;
-  --color-danger-bg: #FEE2E2;
-  --color-info: #2563EB;
-  --color-info-bg: #DBEAFE;
-  --color-accent: #7C3AED;
-  --color-accent-bg: #EDE9FE;
+  --color-success: #1A7A3C;
+  --color-success-bg: #E8F5EE;
+  --color-warning: #B07800;
+  --color-warning-bg: #FFF8E0;
+  --color-danger: #C0392B;
+  --color-danger-bg: #FDECEA;
+  --color-info: #1A5FA0;
+  --color-info-bg: #E8F0FA;
+  --color-accent: #C05000;
+  --color-accent-bg: #FFF0E8;
 
-  /* พื้นหลัง/พื้นผิว — ขาว/เทาอ่อนมาก คอนทราสต์สูงสุด */
+  /* พื้นหลัง/พื้นผิว — ขาว/เขียวอ่อนมาก คอนทราสต์สูงสุด */
   --color-bg: #FFFFFF;
-  --color-surface: #F8FAFA;
-  --color-border: #E2E8E7;
-  --color-text: #111827;
-  --color-text-muted: #4B5563;
-  --color-disabled: #9CA3AF;
+  --color-surface: #F0F4F0;
+  --color-border: #D0DCD0;
+  --color-text: #1A2A1A;
+  --color-text-muted: #6A8A6A;
+  --color-disabled: #9AAA9A;
 
   /* --- H3: ขนาดตัวอักษร/ปุ่ม สำหรับผู้สูงอายุ --- */
   --font-body: 19px;
