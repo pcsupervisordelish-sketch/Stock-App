@@ -6,10 +6,19 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  background: white;
-  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(160deg, var(--brand-green-deep) 0%, var(--brand-green-dark) 45%, var(--brand-green-mid) 100%);
   padding: 10px 12px;
   min-height: 52px;
+  position: relative;
+  overflow: hidden;
+}
+/* เส้นไล่เฉดใต้ topbar — ลายเซ็นของธีม Delish */
+.topbar::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary-btn), #ffe08a);
 }
 
 .topbar__left {
@@ -24,7 +33,7 @@
   padding: 0 14px;
   border: none;
   background: none;
-  color: var(--color-primary);
+  color: #fff;
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
@@ -38,29 +47,43 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.3;
 }
 
 .topbar__branch {
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-muted);
+  color: #fff;
+}
+
+/* วันที่/เวลาปัจจุบัน — แสดงเล็กๆ กำกับไว้เฉยๆ ใต้ชื่อสาขา ไม่มี interaction ใดๆ */
+.topbar__clock {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  font-variant-numeric: tabular-nums;
 }
 
 .topbar__logout {
   flex: 1;
   min-height: 40px;
   padding: 0 12px;
-  border: 2px solid var(--color-danger);
-  border-radius: var(--radius-sm);
-  background: white;
-  color: var(--color-danger);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   white-space: nowrap;
+  transition: background var(--transition-tap);
 }
-.topbar__logout:active { background: var(--color-danger-bg); }
+.topbar__logout:active { background: rgba(255, 255, 255, 0.22); }
 
 @media (min-width: 900px) {
   .topbar__branch { display: none; } /* จอใหญ่เห็นชื่อสาขาใน Sidebar อยู่แล้ว ไม่ต้องซ้ำ */
+  .topbar__clock { display: none; } /* เช่นเดียวกับชื่อสาขา — จอใหญ่แสดงไว้ที่ Sidebar แทน */
 }

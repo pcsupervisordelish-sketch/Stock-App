@@ -21,7 +21,7 @@ export default defineConfig({
         name: 'ระบบจัดการสต๊อกหน้าร้าน',
         short_name: 'สต๊อกหน้าร้าน',
         description: 'ระบบนับสต๊อก รับเข้า ตีคืน และกระทบยอดขายหน้าร้าน',
-        theme_color: '#1A7A3C',
+        theme_color: '#1a4a2e',
         background_color: '#FFFFFF',
         display: 'standalone',
         orientation: 'portrait',
@@ -36,7 +36,25 @@ export default defineConfig({
       workbox: {
         // cache เฉพาะ static asset (JS/CSS/HTML/ไอคอน) ไม่ cache การเรียก Apps Script API
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
-        navigateFallbackDenylist: [/^\/api\//]
+        navigateFallbackDenylist: [/^\/api\//],
+        // ฟอนต์ Sarabun โหลดจาก Google Fonts CDN ภายนอก — cache ไว้ด้วยไม่งั้นเปิดแอปแบบออฟไลน์
+        // (ตามสเปก PWA offline) แล้วฟอนต์จะหายไปเหลือแค่ fallback แม้ static asset อื่นครบ
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: { cacheName: 'google-fonts-stylesheets' }
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-webfonts',
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: { maxAgeSeconds: 60 * 60 * 24 * 365, maxEntries: 20 }
+            }
+          }
+        ]
       }
     })
   ],

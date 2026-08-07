@@ -16,11 +16,25 @@
 }
 
 .sidebar__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px 20px;
+  background: linear-gradient(160deg, var(--brand-green-deep) 0%, var(--brand-green-dark) 45%, var(--brand-green-mid) 100%);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sidebar__brand-title {
   font-size: 20px;
   font-weight: 800;
-  color: var(--color-primary-dark);
-  padding: 24px 20px;
-  border-bottom: 1px solid var(--color-border);
+  color: #fff;
+}
+
+.sidebar__brand-clock {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  font-variant-numeric: tabular-nums;
 }
 
 .sidebar__nav {
@@ -41,7 +55,9 @@
   color: var(--color-text);
   font-size: 17px;
   font-weight: 600;
+  transition: background var(--transition-tap), color var(--transition-tap);
 }
+.sidebar__item:hover { background: var(--color-surface2); }
 
 .sidebar__item.is-active {
   background: var(--color-primary-light);

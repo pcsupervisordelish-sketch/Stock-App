@@ -4,7 +4,6 @@ const TONES = {
   warning: { bg: 'var(--color-warning-bg)', fg: 'var(--color-warning)' },
   danger: { bg: 'var(--color-danger-bg)', fg: 'var(--color-danger)' },
   info: { bg: 'var(--color-info-bg)', fg: 'var(--color-info)' },
-  accent: { bg: 'var(--color-accent-bg)', fg: 'var(--color-accent)' },
   neutral: { bg: 'var(--color-surface)', fg: 'var(--color-text-muted)' }
 }
 

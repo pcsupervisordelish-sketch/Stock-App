@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import Clock from '../ui/Clock'
 import './Sidebar.css'
 
 export default function Sidebar({ items }) {
@@ -7,7 +8,10 @@ export default function Sidebar({ items }) {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar__brand">📦 สต๊อกหน้าร้าน</div>
+      <div className="sidebar__brand">
+        <span className="sidebar__brand-title">📦 สต๊อกหน้าร้าน</span>
+        <Clock className="sidebar__brand-clock" />
+      </div>
       <nav className="sidebar__nav">
         {items.map((item) => (
           <NavLink

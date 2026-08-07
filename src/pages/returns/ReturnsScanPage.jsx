@@ -13,14 +13,12 @@ import { parseScannedCode } from '../../utils/parseScannedCode'
 import { todayKey } from '../../utils/dateUtils'
 import { newTransactionId } from '../../utils/transactionId'
 import QRScanner from '../../components/ui/QRScanner'
-import BottomSheetModal from '../../components/ui/BottomSheetModal'
 import NumericInput from '../../components/ui/NumericInput'
 import QtyStepper from '../../components/ui/QtyStepper'
 import DiscardDraftButton from '../../components/ui/DiscardDraftButton'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
 import RefreshMasterButton from '../../components/ui/RefreshMasterButton'
-import WorkDateTimeBar from '../../components/ui/WorkDateTimeBar'
 import PageHeader from '../../components/layout/PageHeader'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 
@@ -193,11 +191,10 @@ export default function ReturnsScanPage() {
   return (
     <div>
       <PageHeader
-        title={<span style={{ color: `var(--color-${category.tone})` }}>{category.icon} {category.label}</span>}
+        title={`${category.icon} ${category.label}`}
         subtitle={category.description}
         right={<RefreshMasterButton refreshing={masterRefreshing} onRefresh={refreshMaster} />}
       />
-      <WorkDateTimeBar />
 
       <ConfirmDialog
         open={hasRestorableDraft}
@@ -234,71 +231,71 @@ export default function ReturnsScanPage() {
         }}
       />
 
-      <Card style={{ marginBottom: 20 }}>
-        <QRScanner onDetected={handleDetected} disabled={looking} paused={!!pendingProduct} />
-        {looking && <p style={{ marginTop: 10, color: 'var(--color-text-muted)' }}>กำลังค้นหาสินค้า...</p>}
-      </Card>
+      {!pendingProduct && (
+        <Card style={{ marginBottom: 20 }}>
+          <QRScanner onDetected={handleDetected} disabled={looking} />
+          {looking && <p style={{ marginTop: 10, color: 'var(--color-text-muted)' }}>กำลังค้นหาสินค้า...</p>}
+        </Card>
+      )}
 
-      <BottomSheetModal open={!!pendingProduct} onClose={resetEntry}>
-        {pendingProduct && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {notFound && (
-              <div style={{ background: 'var(--color-warning-bg)', color: '#5A3C00', padding: 12, borderRadius: 'var(--radius-sm)', fontSize: 15 }}>
-                ⚠️ ไม่พบรหัส "{pendingProduct.sku}" ในระบบ กรุณากรอกชื่อสินค้าเอง และตรวจสอบรหัสให้ถูกต้อง
-              </div>
-            )}
-            <div>
-              <div style={{ fontSize: 15, color: 'var(--color-text-muted)' }}>รหัสสินค้า</div>
-              <div style={{ fontSize: 20, fontWeight: 700 }}>{pendingProduct.sku}</div>
+      {pendingProduct && (
+        <Card style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {notFound && (
+            <div style={{ background: 'var(--color-warning-bg)', color: '#5A3C00', padding: 12, borderRadius: 'var(--radius-sm)', fontSize: 15 }}>
+              ⚠️ ไม่พบรหัส "{pendingProduct.sku}" ในระบบ กรุณากรอกชื่อสินค้าเอง และตรวจสอบรหัสให้ถูกต้อง
             </div>
-            {notFound ? (
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}>ชื่อสินค้า</label>
-                <input
-                  style={inputStyle}
-                  value={manualName}
-                  onChange={(e) => setManualName(e.target.value)}
-                  autoFocus
-                />
-              </div>
-            ) : (
-              <div>
-                <div style={{ fontSize: 15, color: 'var(--color-text-muted)' }}>ชื่อสินค้า</div>
-                <div style={{ fontSize: 20, fontWeight: 700 }}>{pendingProduct.name}</div>
-              </div>
-            )}
-
-            <NumericInput label="จำนวน" value={quantity} onChange={setQuantity} unit={pendingProduct.unit} />
-
-            {category.requiresNote && (
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}>เหตุผล (บังคับกรอก)</label>
-                <input
-                  style={inputStyle}
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  list="note-history"
-                  placeholder="ระบุเหตุผล"
-                />
-                <datalist id="note-history">
-                  {noteHistory.map((n) => (
-                    <option key={n} value={n} />
-                  ))}
-                </datalist>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: 12 }}>
-              <Button variant="secondary" onClick={resetEntry}>
-                ยกเลิก
-              </Button>
-              <Button onClick={handleConfirmAdd} disabled={quantity <= 0}>
-                เพิ่มรายการ
-              </Button>
-            </div>
+          )}
+          <div>
+            <div style={{ fontSize: 15, color: 'var(--color-text-muted)' }}>รหัสสินค้า</div>
+            <div style={{ fontSize: 20, fontWeight: 700 }}>{pendingProduct.sku}</div>
           </div>
-        )}
-      </BottomSheetModal>
+          {notFound ? (
+            <div>
+              <label style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}>ชื่อสินค้า</label>
+              <input
+                style={inputStyle}
+                value={manualName}
+                onChange={(e) => setManualName(e.target.value)}
+                autoFocus
+              />
+            </div>
+          ) : (
+            <div>
+              <div style={{ fontSize: 15, color: 'var(--color-text-muted)' }}>ชื่อสินค้า</div>
+              <div style={{ fontSize: 20, fontWeight: 700 }}>{pendingProduct.name}</div>
+            </div>
+          )}
+
+          <NumericInput label="จำนวน" value={quantity} onChange={setQuantity} unit={pendingProduct.unit} />
+
+          {category.requiresNote && (
+            <div>
+              <label style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}>เหตุผล (บังคับกรอก)</label>
+              <input
+                style={inputStyle}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                list="note-history"
+                placeholder="ระบุเหตุผล"
+              />
+              <datalist id="note-history">
+                {noteHistory.map((n) => (
+                  <option key={n} value={n} />
+                ))}
+              </datalist>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Button variant="secondary" onClick={resetEntry}>
+              ยกเลิก
+            </Button>
+            <Button onClick={handleConfirmAdd} disabled={quantity <= 0}>
+              เพิ่มรายการ
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {items.length > 0 && (
         <>
@@ -311,39 +308,28 @@ export default function ReturnsScanPage() {
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 100 }}>
-            {items.map((item, index) => {
-              const itemCategory = getCategory(item.category)
-              return (
-                <Card
-                  key={item.rowId}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    borderLeft: `4px solid var(--color-${itemCategory?.tone || 'neutral'})`
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 700 }}>{item.name}</div>
-                    <div style={{ fontSize: 14, color: `var(--color-${itemCategory?.tone || 'neutral'})`, fontWeight: 600 }}>
-                      {itemCategory?.icon} {item.category}
-                      {item.note ? <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}> • {item.note}</span> : ''}
-                    </div>
+            {items.map((item, index) => (
+              <Card key={item.rowId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontWeight: 700 }}>{item.name}</div>
+                  <div style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
+                    {getCategory(item.category)?.icon} {item.category}
+                    {item.note ? ` • ${item.note}` : ''}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <QtyStepper value={item.quantity} onChange={(qty) => updateItemQuantity(index, qty)} />
-                    <button
-                      type="button"
-                      onClick={() => removeItem(index)}
-                      aria-label="ลบรายการ"
-                      style={{ border: 'none', background: 'none', color: 'var(--color-danger)', fontSize: 22, cursor: 'pointer' }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </Card>
-              )
-            })}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <QtyStepper value={item.quantity} onChange={(qty) => updateItemQuantity(index, qty)} />
+                  <button
+                    type="button"
+                    onClick={() => removeItem(index)}
+                    aria-label="ลบรายการ"
+                    style={{ border: 'none', background: 'none', color: 'var(--color-danger)', fontSize: 22, cursor: 'pointer' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              </Card>
+            ))}
           </div>
 
           <StickyActionBar>

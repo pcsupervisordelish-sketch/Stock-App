@@ -1,14 +1,21 @@
 /* ================================================================
-   Design Tokens — อิงสเปกหมวด H (UX/UI สำหรับผู้สูงอายุ) ในเอกสาร prompt
+   Design Tokens — อิงสเปกหมวด H (UX/UI สำหรับผู้สูงอายุ) + ชุดสี/ฟอนต์
+   ให้ตรงกับ Delish POS V4 / ระบบส่งยอดขายประจำวัน (เขียว + Sarabun)
    ห้ามแก้ค่าพวกนี้แบบสุ่มในคอมโพเนนต์ย่อย ให้ประกาศ token ใหม่ที่นี่แทน
    ================================================================ */
 :root {
-  /* --- H1: โทนสี — อิงชุดสี Delish POS V4 (เขียวเป็นสีหลัก) --- */
+  /* --- H1: โทนสี — เขียว Delish เป็นสีหลัก --- */
   --color-primary: #1A7A3C;
   --color-primary-dark: #145F2F;
   --color-primary-light: #E8F5EE;
-  --color-primary-btn: #22A050; /* เขียวปุ่มกด (สดกว่า primary เล็กน้อย ใช้กับปุ่ม action หลัก) */
-  --color-primary-mid: #B8DFC8; /* เขียวกลาง ใช้ทำ border/แถบเน้นเบาๆ */
+  --color-primary-mid: #B8DFC8;   /* เขียวกลาง — border/แถบเน้นเบาๆ ใต้หัวข้อ */
+  --color-primary-btn: #22A050;   /* เขียวสดสำหรับปุ่ม action หลัก */
+
+  /* โทนเขียวเข้มมาก — ใช้เฉพาะ TopBar/Sidebar/หน้า Login (gradient แบรนด์) */
+  --brand-green-deep: #0d2e1a;
+  --brand-green-dark: #1a4a2e;
+  --brand-green-mid: #2d6b42;
+  --brand-green-btn: #2d8a52;
 
   /* สีสถานะ — สงวนไว้ใช้เฉพาะบอกสถานะเท่านั้น ห้ามใช้ตกแต่งทั่วไป */
   --color-success: #1A7A3C;
@@ -22,15 +29,18 @@
   --color-accent: #C05000;
   --color-accent-bg: #FFF0E8;
 
-  /* พื้นหลัง/พื้นผิว — ขาว/เขียวอ่อนมาก คอนทราสต์สูงสุด */
+  /* พื้นหลัง/พื้นผิว — เขียวอ่อนมาก คอนทราสต์สูงสุด (ตามชุดสี Delish) */
   --color-bg: #FFFFFF;
   --color-surface: #F0F4F0;
+  --color-surface2: #F5F8F5;
   --color-border: #D0DCD0;
+  --color-border2: #E0E8E0;
   --color-text: #1A2A1A;
   --color-text-muted: #6A8A6A;
   --color-disabled: #9AAA9A;
 
   /* --- H3: ขนาดตัวอักษร/ปุ่ม สำหรับผู้สูงอายุ --- */
+  --font-family: 'Sarabun', 'Noto Sans Thai', system-ui, -apple-system, sans-serif;
   --font-body: 19px;
   --font-heading: 26px;
   --font-input-number: 34px;
@@ -40,13 +50,14 @@
 
   --radius: 14px;
   --radius-sm: 8px;
+  --radius-pill: 999px;
 
   /* --- H5: Animation ระดับพอประมาณ --- */
   --transition-page: 220ms ease;
   --transition-tap: 100ms ease;
 
-  --shadow-card: 0 1px 3px rgba(15, 23, 22, 0.08), 0 1px 2px rgba(15, 23, 22, 0.06);
-  --shadow-modal: 0 10px 30px rgba(15, 23, 22, 0.18);
+  --shadow-card: 0 2px 8px rgba(0, 60, 20, 0.08), 0 1px 2px rgba(0, 60, 20, 0.06);
+  --shadow-modal: 0 10px 30px rgba(0, 60, 20, 0.18);
 }
 
 * { box-sizing: border-box; }
@@ -57,7 +68,7 @@ html, body, #root {
 }
 
 body {
-  font-family: 'Noto Sans Thai', 'Sarabun', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-family);
   font-size: var(--font-body);
   color: var(--color-text);
   background: var(--color-surface);
@@ -67,6 +78,13 @@ body {
 
 button, input, select, textarea {
   font-family: inherit;
+}
+
+/* กันคีย์บอร์ดมือถือ (โดยเฉพาะ iOS Safari) auto-zoom ตอน focus ช่องกรอกที่ font-size < 16px —
+   บังคับ floor ไว้ที่ 16px ให้ทุกช่องกรอกทั่วแอปเผื่อจุดที่ inline style หลุดมา ไม่กระทบกับ
+   NumericInput/ปุ่มใหญ่ที่กำหนด font-size เกิน 16px อยู่แล้ว */
+input, select, textarea {
+  font-size: max(16px, 1em);
 }
 
 /* focus visible เพื่อการเข้าถึง (accessibility floor) */
@@ -89,14 +107,16 @@ button, input, select, textarea {
 
 h1, h2, h3 {
   font-size: var(--font-heading);
-  font-weight: 700;
+  font-weight: 800;
   margin: 0 0 12px 0;
+  letter-spacing: -0.2px;
 }
 
 .page {
   max-width: 640px;
   margin: 0 auto;
-  padding: 20px 16px 100px 16px; /* เผื่อ bottom nav */
+  /* เผื่อ BottomNav + safe-area inset ล่าง (iPhone ที่มี home indicator) กันเนื้อหาแถวสุดท้ายโดนบัง */
+  padding: 20px 16px calc(100px + env(safe-area-inset-bottom, 0px)) 16px;
   min-height: 100%;
 }
 
@@ -122,31 +142,4 @@ h1, h2, h3 {
     top: 0;
     width: 100%;
   }
-}
-
-/* เปลี่ยนหน้า (navigation) ให้มี fade+slide เบาๆ ทุกครั้ง — ใช้คู่กับ key={pathname} ที่ AppLayout
-   เพื่อบังคับ remount แล้ว trigger animation ใหม่ทุกครั้งที่เปลี่ยนเส้นทาง */
-@keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.page-transition {
-  animation: page-enter var(--transition-page) both;
-}
-
-/* Card ที่กดได้ (มี onClick) ให้มี feedback ตอน hover/active เบาๆ ทั่วทั้งแอป */
-.card-interactive {
-  transition: transform var(--transition-tap), box-shadow var(--transition-tap);
-}
-.card-interactive:hover {
-  box-shadow: 0 4px 12px rgba(15, 23, 22, 0.1);
-}
-.card-interactive:active {
-  transform: scale(0.98);
 }

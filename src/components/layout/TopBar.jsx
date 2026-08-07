@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { getBackTarget } from '../../utils/backNavigation'
 import ConfirmDialog from '../ui/ConfirmDialog'
+import Clock from '../ui/Clock'
 import './TopBar.css'
 
 export default function TopBar() {
@@ -25,6 +26,7 @@ export default function TopBar() {
 
       <div className="topbar__center">
         <span className="topbar__branch">{session?.branchName}</span>
+        <Clock className="topbar__clock" />
       </div>
 
       <button className="topbar__logout" onClick={() => setConfirmLogout(true)} aria-label="ออกจากระบบ">

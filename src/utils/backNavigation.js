@@ -10,7 +10,13 @@ const BACK_RULES = [
   [/^\/receiving\/summary$/, () => '/receiving'],
   [/^\/receiving$/, () => '/home'],
 
-  [/^\/returns\/scan\/[^/]+$/, () => '/returns'],
+  [/^\/returns\/scan\/([^/]+)$/, (m) => {
+    // "เสียคัดออก"/"เสียทำลายหน้าร้าน" มาจากหน้าย่อย /returns/spoil ต้องย้อนกลับไปที่นั่น
+    // ไม่ใช่ /returns ตรงๆ ไม่งั้นผู้ใช้ต้องกดเข้า "เสีย" ซ้ำสองรอบถ้าเลือกผิดหมวด
+    const value = decodeURIComponent(m[1])
+    return value === 'เสียคัดออก' || value === 'เสียทำลายหน้าร้าน' ? '/returns/spoil' : '/returns'
+  }],
+  [/^\/returns\/spoil$/, () => '/returns'],
   [/^\/returns\/(pending|history)$/, () => '/returns'],
   [/^\/returns$/, () => '/home'],
 

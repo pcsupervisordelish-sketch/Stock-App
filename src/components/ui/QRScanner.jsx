@@ -10,25 +10,13 @@ const TARGET_ZOOM = 2 // ซูมเป้าหมาย (เท่า) ใช
  * ทุกจุดที่ใช้คอมโพเนนต์นี้ต้องมีช่องกรอกรหัสมือสำรองเสมอ (บังคับตามสเปก)
  * onDetected(code: string) จะถูกเรียกทั้งจากการสแกนกล้องและจากการกรอกมือ
  * — ผู้เรียกต้อง parse ด้วย parseScannedCode เองเสมอ (รองรับรูปแบบ "รหัส|น้ำหนัก")
- *
- * disabled: ปิดกล้องจริง (หยุด stream) ใช้เมื่อไม่ต้องการเปิดกล้องเลย
- * paused: กล้องยังทำงานอยู่เบื้องหลังตามปกติ แค่ "ไม่รับ" ผลตรวจจับใหม่ชั่วคราว — ใช้ตอนมี popup
- *   รายละเอียดสินค้า (BottomSheetModal) เปิดค้างอยู่ กันสแกนซ้อนตอนกำลังกรอกจำนวน โดยไม่ต้องปิด-เปิด
- *   กล้องใหม่ทุกรอบ (ซึ่งมี latency เริ่มกล้องทุกครั้ง) — พอปิด popup แล้วพร้อมสแกนต่อทันที
  */
-export default function QRScanner({ onDetected, disabled = false, paused = false }) {
+export default function QRScanner({ onDetected, disabled = false }) {
   const [mode, setMode] = useState('camera') // 'camera' | 'manual'
   const [manualCode, setManualCode] = useState('')
   const [cameraError, setCameraError] = useState(null)
   const scannerRef = useRef(null)
   const hasDetectedRef = useRef(false) // กัน html5-qrcode ยิง onScanSuccess ซ้ำหลายเฟรมสำหรับ QR เดิม
-  const pausedRef = useRef(paused) // ใช้ ref เพื่ออ่านค่า paused ล่าสุดจาก callback โดยไม่ต้อง restart กล้อง
-
-  useEffect(() => {
-    pausedRef.current = paused
-    // ปลด pause แล้ว (ปิด popup, พร้อมสแกนชิ้นถัดไป) -> reset guard ให้รับการตรวจจับใหม่ได้ทันที
-    if (!paused) hasDetectedRef.current = false
-  }, [paused])
 
   useEffect(() => {
     if (mode !== 'camera' || disabled) return undefined
@@ -46,11 +34,8 @@ export default function QRScanner({ onDetected, disabled = false, paused = false
           { facingMode: 'environment' },
           { fps: 10, qrbox: { width: 240, height: 240 } },
           (decodedText) => {
-            // กำลัง pause อยู่ (เช่น popup รายละเอียดสินค้าเปิดค้าง) -> เมินผลตรวจจับนี้ไปเลย
-            // กล้องยังทำงานต่อเนื่องปกติ ไม่ต้อง restart
-            if (pausedRef.current) return
             // html5-qrcode จะเรียก callback นี้ซ้ำได้หลายเฟรมถ้า QR เดิมยังอยู่ในกล้อง
-            // (ทำให้ onDetected อาจถูกยิงซ้ำ = double-scan) รับแค่ครั้งแรกต่อรอบเท่านั้น
+            // (ทำให้ onDetected อาจถูกยิงซ้ำ = double-scan) รับแค่ครั้งแรกต่อ session เท่านั้น
             if (hasDetectedRef.current) return
             hasDetectedRef.current = true
             // เสียง/feedback สแกนสำเร็จ (ถ้าเบราว์เซอร์รองรับ)

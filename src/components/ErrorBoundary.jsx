@@ -66,7 +66,7 @@ const styles = {
     justifyContent: 'center',
     padding: 20,
     background: '#F0F4F0',
-    fontFamily: "'Noto Sans Thai', 'Sarabun', system-ui, -apple-system, sans-serif"
+    fontFamily: "'Sarabun', 'Noto Sans Thai', system-ui, -apple-system, sans-serif"
   },
   card: {
     background: 'white',
@@ -75,7 +75,7 @@ const styles = {
     maxWidth: 420,
     width: '100%',
     textAlign: 'center',
-    boxShadow: '0 1px 3px rgba(15,23,22,0.08), 0 1px 2px rgba(15,23,22,0.06)'
+    boxShadow: '0 2px 8px rgba(0,60,20,0.08), 0 1px 2px rgba(0,60,20,0.06)'
   },
   title: { fontSize: 22, fontWeight: 800, margin: '0 0 12px 0', color: '#1A2A1A' },
   text: { fontSize: 16, color: '#6A8A6A', lineHeight: 1.6, marginBottom: 24 },

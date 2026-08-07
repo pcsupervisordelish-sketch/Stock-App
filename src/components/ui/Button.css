@@ -20,17 +20,17 @@
 .btn--md { min-height: var(--button-height); padding: 0 20px; font-size: 18px; }
 
 .btn--primary {
-  background: var(--color-primary-btn);
+  background: linear-gradient(135deg, var(--color-primary-btn), var(--color-primary));
   color: white;
 }
-.btn--primary:hover:not(:disabled) { background: var(--color-primary); }
+.btn--primary:hover:not(:disabled) { background: var(--color-primary-dark); }
 
 .btn--secondary {
   background: white;
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary-mid);
 }
-.btn--secondary:hover:not(:disabled) { background: var(--color-primary-light); }
+.btn--secondary:hover:not(:disabled) { background: var(--color-primary-light); border-color: var(--color-primary); }
 
 .btn--danger {
   background: var(--color-danger);

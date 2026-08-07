@@ -5,6 +5,7 @@ import AppLayout from './components/layout/AppLayout'
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 import ReturnsHomePage from './pages/returns/ReturnsHomePage'
+import ReturnsSpoilPage from './pages/returns/ReturnsSpoilPage'
 import ReturnsScanPage from './pages/returns/ReturnsScanPage'
 import ReturnsPendingPage from './pages/returns/ReturnsPendingPage'
 import ReturnsHistoryPage from './pages/returns/ReturnsHistoryPage'
@@ -59,6 +60,7 @@ export default function App() {
 
             {/* โมดูล C — บันทึก/ตีคืนสินค้า (ใช้ร่วม 2 ประเภทสาขา) */}
             <Route path="/returns" element={<ReturnsHomePage />} />
+            <Route path="/returns/spoil" element={<ReturnsSpoilPage />} />
             <Route path="/returns/scan/:category" element={<ReturnsScanPage />} />
             <Route path="/returns/pending" element={<ReturnsPendingPage />} />
             <Route path="/returns/history" element={<ReturnsHistoryPage />} />

@@ -1,13 +1,11 @@
 // หมวดหมู่การบันทึก/ตีคืนสินค้า ตามสเปก C0
 // value ตรงกับค่าที่เขียนลงคอลัมน์ "หมวด" ใน Tab ReturnOut ต้องสะกดตรงเป๊ะ
-// tone = สีประจำหมวด (แยกสีชัดเจนกันพนักงานกรอกผิดหมวด) — ใช้คู่กับ StatusBadge tone system
 export const RETURN_CATEGORIES = [
   {
     value: 'เสียคัดออก',
     label: 'เสียคัดออก',
     group: 'เสีย',
     icon: '🔴',
-    tone: 'danger',
     hasPhysicalReturn: true, // มีของจริงส่งกลับคลัง — ต้องมีคนเซ็นรับตอนขนส่งมารับ
     requiresNote: false,
     description: 'มีของจริงส่งกลับคลัง — ต้องมีคนเซ็นรับตอนขนส่งมารับ'
@@ -16,8 +14,7 @@ export const RETURN_CATEGORIES = [
     value: 'เสียทำลายหน้าร้าน',
     label: 'เสียทำลายหน้าร้าน',
     group: 'เสีย',
-    icon: '🟠',
-    tone: 'warning',
+    icon: '🔴',
     hasPhysicalReturn: false, // ไม่มีของจริงส่งกลับ ให้คลังตัดยอดอย่างเดียว
     requiresNote: false,
     description: 'ไม่มีของจริงส่งกลับ — ให้คลังตัดยอดอย่างเดียว'
@@ -27,7 +24,6 @@ export const RETURN_CATEGORIES = [
     label: 'แถม',
     group: null,
     icon: '🎁',
-    tone: 'success',
     hasPhysicalReturn: false,
     requiresNote: false,
     description: 'ตัวเลขในหมวดนี้ฝ่ายอื่นเป็นคนจัดการ — บันทึกไว้เพื่ออ้างอิง/กระทบยอด'
@@ -37,7 +33,6 @@ export const RETURN_CATEGORIES = [
     label: 'เคลม',
     group: null,
     icon: '🔄',
-    tone: 'info',
     hasPhysicalReturn: false,
     requiresNote: false,
     description: 'ลูกค้าขอเคลมแต่ไม่มีของจริงมาเปลี่ยนให้ (ถ้ามีของจริงมาเปลี่ยน ให้บันทึกเป็น "เสีย" แทน)'
@@ -47,7 +42,6 @@ export const RETURN_CATEGORIES = [
     label: 'อื่นๆ',
     group: null,
     icon: '❓',
-    tone: 'accent',
     hasPhysicalReturn: false,
     requiresNote: true, // บังคับกรอกเหตุผล free text
     description: 'บังคับกรอกเหตุผล'
